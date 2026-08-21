@@ -1,15 +1,65 @@
 {
-  "name": "PLAY. Guitar Coach",
+  "id": "./",
+  "name": "PLAY. Guitar Teacher",
   "short_name": "PLAY.",
-  "description": "Adaptive Gitarren-PWA mit Lernpfad, Practice-Sessions, Tuner, Metronom und Fortschritt.",
+  "description": "Geführter Gitarrenkurs als Offline-PWA mit visuellen Lektionen, Fehlerhilfe, Practice, Tuner, Metronom und Fortschritt.",
+  "lang": "de-DE",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#f5f1ea",
   "theme_color": "#151515",
   "orientation": "any",
+  "categories": [
+    "education",
+    "music",
+    "productivity"
+  ],
+  "prefer_related_applications": false,
   "icons": [
-    {"src":"assets/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
-    {"src":"assets/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Practice",
+      "short_name": "Practice",
+      "url": "./index.html?tab=practice",
+      "icons": [
+        {
+          "src": "assets/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Tools",
+      "short_name": "Tools",
+      "url": "./index.html?tab=tools",
+      "icons": [
+        {
+          "src": "assets/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
   ]
 }
