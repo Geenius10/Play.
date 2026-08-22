@@ -22,18 +22,40 @@ header{display:flex;justify-content:space-between;align-items:end;margin-bottom:
 
 .fingerTag{font-size:9px;font-weight:900;fill:#8064a2}
 .tabFret{font-size:13px;font-weight:800}
+
+.practiceHub{display:grid;gap:10px}.practiceGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.practiceFamily{border:1px solid var(--line);background:#fbfaf8;border-radius:16px;padding:12px;text-align:left;display:grid;gap:6px}.practiceFamily h3{margin:0;font-size:15px}.practiceFamily p{font-size:11px;color:var(--muted);margin:0}.practiceFamily strong{font-size:9px;color:var(--accent);letter-spacing:.08em}.familyPanel{display:grid;gap:10px;border-top:1px solid var(--line);padding-top:10px}.keygrid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}.keygrid button,.segRow button,.depthRow button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 9px;font-size:11px}.keygrid button.active,.segRow button.active,.depthRow button.active{background:var(--ink);color:#fff}.segRow,.depthRow{display:flex;gap:6px;overflow:auto;scrollbar-width:none}.familyActions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.connection,.songMoment,.learnCard{border:1px solid var(--line);background:#fff;border-radius:14px;padding:10px;display:grid;gap:7px}.connectionFlow{display:flex;gap:5px;overflow:auto;align-items:center}.connectionFlow span{white-space:nowrap;padding:6px 8px;border-radius:9px;background:var(--soft);font-size:10px}.connectionFlow b{font-size:10px}.small{font-size:10px;color:var(--muted);line-height:1.4}.songMoment button,.familyActions button{min-height:42px;border:1px solid var(--line);border-radius:12px;background:#fff;font-weight:800}.learnGrid{display:grid;gap:9px}.adaptiveTag{font-size:9px;font-weight:900;color:var(--accent)}
+@media(max-width:620px){.practiceGrid{grid-template-columns:1fr}.keygrid{grid-template-columns:repeat(4,1fr)}.familyActions{grid-template-columns:1fr}}
+
+.coachHero{border:1px solid var(--line);background:linear-gradient(180deg,#fff,#fbfaf8);border-radius:18px;padding:14px;display:grid;gap:10px}
+.coachHero h2{margin:0;font-size:22px;letter-spacing:-.4px}.coachMeta{display:flex;gap:6px;flex-wrap:wrap}.coachMeta span{font-size:10px;padding:6px 8px;border-radius:999px;background:var(--soft)}
+.coachWhy{font-size:11px;color:var(--muted);line-height:1.45}.coachStart{min-height:50px;border:0;border-radius:14px;background:var(--ink);color:#fff;font-weight:900}
+.coachQueue{display:grid;gap:7px}.queueItem{display:grid;grid-template-columns:26px 1fr auto;gap:9px;align-items:center;border:1px solid var(--line);border-radius:13px;padding:9px;background:#fff}.queueNo{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--soft);font-size:10px;font-weight:900}.queueItem b{font-size:11px}.queueItem small{font-size:9px;color:var(--muted)}
+.adjustToggle{border:0;background:transparent;text-decoration:underline;color:var(--muted);font-size:10px;padding:4px 0}.advancedSettings{display:none}.advancedSettings.open{display:grid;gap:10px}.coachAlt{display:grid;grid-template-columns:1fr 1fr;gap:8px}.coachAlt button{min-height:42px;border:1px solid var(--line);border-radius:12px;background:#fff;font-weight:800}
+@media(max-width:620px){.coachAlt{grid-template-columns:1fr}.coachHero h2{font-size:20px}}
+
+.coachStepBanner{display:none;margin:10px 0;padding:12px;border:1px solid var(--line);border-radius:16px;background:var(--soft)}
+.coachStepBanner.on{display:grid;gap:6px}.coachStepBanner .top{display:flex;justify-content:space-between;gap:10px;align-items:center}.coachStepBanner b{font-size:13px}.coachStepBanner span{font-size:10px;color:var(--muted)}
+.coachStepBanner .rule{font-size:11px;line-height:1.4}.coachStepBanner .progressbar{height:7px;background:#ddd7cf;border-radius:99px;overflow:hidden}.coachStepBanner .progressbar i{display:block;height:100%;width:0;background:var(--accent)}
+.coachDone{display:grid;gap:8px;padding:12px;border:1px solid var(--line);border-radius:15px;background:#fff;margin-top:10px}.coachDone button{min-height:44px;border:0;border-radius:12px;background:var(--ink);color:#fff;font-weight:900}
+.coachLocked #freeControls{display:none}.coachLocked .librarySwitch{display:none}
 </style>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#171717">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="PLAY.">
+<link rel="apple-touch-icon" href="icon-192.svg">
 </head>
 <body>
 <main class="app">
 <header><div><div class="brand">PLAY.</div><div class="sub">40 Übungen · 10 Songs · Noten + TAB + Timing</div></div><div class="sub">Noten + TAB + Timing</div></header>
 <section class="card">
-<div class="librarySwitch"><button class="active" data-library="exercise">Übungen</button><button data-library="song">Songs</button></div>
-<div class="exercise-list" id="exerciseList"></div>
+<div class="librarySwitch"><button class="active" data-library="practice">Practice</button><button data-library="learn">Lernen</button><button data-library="song">Songs</button></div>
+<div id="practiceHub"></div><div class="exercise-list" id="exerciseList"></div>
 </section>
 <section class="card">
-<h1 id="title"></h1><p id="goal"></p>
-<div class="controls">
+<h1 id="title"></h1><p id="goal"></p><div id="coachStepBanner"></div>
+<div class="controls" id="freeControls">
 <div class="control"><label>TEMPO</label><select id="bpm"></select></div>
 <div class="control"><label>COUNT-IN</label><select id="count"><option value="1">1 Takt</option><option value="2">2 Takte</option><option value="0">Keiner</option></select></div>
 <div class="control"><label>GUIDE-TON</label><select id="guide"><option value="on">An</option><option value="off">Aus</option></select></div>
@@ -46,6 +68,18 @@ header{display:flex;justify-content:space-between;align-items:end;margin-bottom:
 <div class="legend"><span>𝅘𝅥 Viertel</span><span>♫ Achtel</span><span>𝅗𝅥 Halbe</span><span>𝄽 Pause</span><span><b>1</b> Zeige</span><span><b>2</b> Mittel</span><span><b>3</b> Ring</span><span><b>4</b> Kleiner Finger</span><span>Noten und TAB teilen dieselbe Zeitachse</span></div>
 </section>
 <section class="card music"><div><b>Musik verstehen</b><p id="musicText"></p></div><div><b>Übeziel</b><p>Starte langsam. Erhöhe das Tempo erst, wenn Noten, TAB, Metronom und dein Anschlag zusammenliegen.</p></div></section>
+
+<section class="card">
+  <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap">
+    <div><b>Daten & Backup</b><p style="margin:4px 0 0;font-size:11px;color:var(--muted)">Sichert Lernfortschritt, Coach-Status, Tonarten-Statistik und Einstellungen.</p></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button id="backupExport" class="stop">Backup erstellen</button>
+      <label class="stop" style="display:grid;place-items:center;cursor:pointer">Backup wiederherstellen<input id="backupImport" type="file" accept=".json,application/json" hidden></label>
+      <button id="backupReset" class="stop">Daten zurücksetzen</button>
+    </div>
+  </div>
+  <div id="backupStatus" style="font-size:10px;color:var(--muted);margin-top:8px"></div>
+</section>
 </main>
 <script>
 const EX=[{"id": "ex1", "title": "A-Moll-Pentatonik · Grundphrase", "level": "Einfach", "bpm": 70, "goal": "Puls halten und auf A landen.", "events": [[0.25, [null, null, null, null, 5, null], 45], [0.125, [null, null, null, 5, null, null], 55], [0.125, [null, null, null, 7, null, null], 57], [0.25, [null, null, 5, null, null, null], 60], [0.25, [null, null, 7, null, null, null], 62], [0.125, [null, 5, null, null, null, null], 64], [0.125, [null, 8, null, null, null, null], 67], [0.25, [5, null, null, null, null, null], 69], [0.25, [8, null, null, null, null, null], 72], [0.25, [5, null, null, null, null, null], 69], [0.5, [null, null, 7, null, null, null], 62], [0.25, [null, null, 5, null, null, null], 60], [0.25, [null, null, null, null, 5, null], 45], [0.25, ["R", null, null, null, null, null], null], [0.125, [null, null, null, 5, null, null], 55], [0.125, [null, null, null, 7, null, null], 57], [0.25, [null, null, 5, null, null, null], 60], [0.25, [null, null, null, null, 5, null], 45]]}, {"id": "ex2", "title": "Chromatik 1-2-3-4 · 5. Lage", "level": "Einfach", "bpm": 60, "goal": "Vier Finger gleichmäßig und entspannt bewegen.", "events": [[0.125, [null, null, null, null, null, 5], 41], [0.125, [null, null, null, null, null, 6], 42], [0.125, [null, null, null, null, null, 7], 43], [0.125, [null, null, null, null, null, 8], 44], [0.125, [null, null, null, null, 5, null], 50], [0.125, [null, null, null, null, 6, null], 51], [0.125, [null, null, null, null, 7, null], 52], [0.125, [null, null, null, null, 8, null], 53], [0.125, [null, null, null, 5, null, null], 55], [0.125, [null, null, null, 6, null, null], 56], [0.125, [null, null, null, 7, null, null], 57], [0.125, [null, null, null, 8, null, null], 58], [0.125, [null, null, 5, null, null, null], 60], [0.125, [null, null, 6, null, null, null], 61], [0.125, [null, null, 7, null, null, null], 62], [0.125, [null, null, 8, null, null, null], 63]]}, {"id": "ex3", "title": "Alternate Picking · zwei Saiten", "level": "Einfach", "bpm": 70, "goal": "Ab- und Aufschlag gleich laut halten.", "events": [[0.125, [null, null, null, null, 5, null], 50], [0.125, [null, null, null, null, 7, null], 52], [0.125, [null, null, null, 5, null, null], 55], [0.125, [null, null, null, 7, null, null], 57], [0.125, [null, null, null, null, 7, null], 52], [0.125, [null, null, null, null, 5, null], 50], [0.125, [null, null, null, 7, null, null], 57], [0.125, [null, null, null, 5, null, null], 55], [0.25, [null, null, null, null, 5, null], 50], [0.25, [null, null, null, null, 7, null], 52], [0.25, [null, null, null, 5, null, null], 55], [0.25, [null, null, null, 7, null, null], 57]]}, {"id": "ex4", "title": "Akkordrhythmus · Em – C – G – D", "level": "Einfach", "bpm": 65, "goal": "Akkorde exakt auf Zählzeit 1 wechseln.", "events": [[0.25, ["0", "0", "0", "2", "2", "0"], 52], [0.25, ["0", "0", "0", "2", "2", "0"], 52], [0.25, ["0", "0", "0", "2", "2", "0"], 52], [0.25, ["0", "0", "0", "2", "2", "0"], 52], [0.25, ["0", "1", "0", "2", "3", null], 48], [0.25, ["0", "1", "0", "2", "3", null], 48], [0.25, ["0", "1", "0", "2", "3", null], 48], [0.25, ["0", "1", "0", "2", "3", null], 48], [0.25, ["3", "0", "0", "0", "2", "3"], 43], [0.25, ["3", "0", "0", "0", "2", "3"], 43], [0.25, ["3", "0", "0", "0", "2", "3"], 43], [0.25, ["3", "0", "0", "0", "2", "3"], 43], [0.25, [null, "3", "2", "0", null, null], 50], [0.25, [null, "3", "2", "0", null, null], 50], [0.25, [null, "3", "2", "0", null, null], 50], [0.25, [null, "3", "2", "0", null, null], 50]]}, {"id": "ex5", "title": "Blues · Frage und Antwort", "level": "Mittel", "bpm": 72, "goal": "Phrasieren und Pausen bewusst setzen.", "events": [[0.125, [null, null, null, 5, null, null], 55], [0.125, [null, null, null, 7, null, null], 57], [0.25, [null, null, 5, null, null, null], 60], [0.25, ["R", null, null, null, null, null], null], [0.25, [null, null, 7, null, null, null], 62], [0.125, [null, 5, null, null, null, null], 64], [0.125, [null, 8, null, null, null, null], 67], [0.25, [5, null, null, null, null, null], 69], [0.25, ["R", null, null, null, null, null], null], [0.25, [null, 8, null, null, null, null], 67], [0.125, [null, 5, null, null, null, null], 64], [0.125, [null, null, 7, null, null, null], 62], [0.5, [null, null, null, null, 5, null], 45]]}, {"id": "ex6", "title": "Arpeggio · Am", "level": "Einfach", "bpm": 60, "goal": "Akkordtöne als zusammengehörigen Klang hören.", "events": [[0.25, [null, null, null, null, 0, null], 45], [0.25, [null, null, null, 2, null, null], 57], [0.25, [null, null, 2, null, null, null], 60], [0.25, [null, 1, null, null, null, null], 65], [0.25, [0, null, null, null, null, null], 69], [0.25, [null, 1, null, null, null, null], 65], [0.25, [null, null, 2, null, null, null], 60], [0.25, [null, null, null, 2, null, null], 57], [0.5, [null, null, null, null, 0, null], 45]]}];
@@ -534,7 +568,119 @@ function auditLibrary(){
 const AUDIT=auditLibrary();
 EX.splice(0,EX.length,...AUDITED_EX,...AUDITED_SONGS);
 window.__PLAY_AUDIT__=AUDIT;
-let current=0,currentLibrary='exercise',ctx=null,run=null,raf=0,nodes=[];
+
+const KEYS=[['C','C'],['Db','C♯/D♭'],['D','D'],['Eb','E♭'],['E','E'],['F','F'],['Gb','F♯/G♭'],['G','G'],['Ab','A♭'],['A','A'],['Bb','B♭'],['B','B']];
+const KEY_PC={C:0,Db:1,D:2,Eb:3,E:4,F:5,Gb:6,G:7,Ab:8,A:9,Bb:10,B:11};
+const FORMULAS={major:[0,2,4,5,7,9,11],naturalMinor:[0,2,3,5,7,8,10],pentMinor:[0,3,5,7,10],blues:[0,3,5,6,7,10],harmonicMinor:[0,2,3,5,7,8,11]};
+const FAMILIES=[
+ {id:'scales',title:'Scales',desc:'Eine Übung – alle Tonarten, Shapes und Anwendungen.',modes:['Auf / ab','Sequenzen','Thirds','Intervalle','Triads','Arpeggios','Improvisation']},
+ {id:'triads',title:'Triads & Arpeggios',desc:'1–3–5, Inversions und diatonische Triads aus derselben Tonart.',modes:['Root Position','1. Inversion','2. Inversion','Diatonic Triads','Arpeggio']},
+ {id:'rhythm',title:'Rhythm & Chords',desc:'Subdivisions, Groove und Akkordfolgen statt isolierter Karten.',modes:['Viertel','Achtel','16tel','Synkopen','I–V–vi–IV']},
+ {id:'fretboard',title:'Fretboard Connections',desc:'Horizontal, vertikal, Positionen und CAGED verbinden.',modes:['Horizontal','Vertikal','Positionswechsel','CAGED']},
+ {id:'technique',title:'Technique',desc:'Spider, Picking, Legato und String Crossing kompakt gruppiert.',modes:['Spider','Alternate Picking','Legato','String Crossing']},
+ {id:'ear',title:'Ear & Apply',desc:'Hören direkt an den gerade gespielten Inhalten.',modes:['Grundton','Intervalle','Triad hören','Phrase nachspielen']}
+];
+let prefs={family:'scales',key:'C',scale:'major',mode:'Auf / ab',shape:1,tempo:70};let keyStats={};
+try{prefs=Object.assign(prefs,JSON.parse(localStorage.getItem('play_structured_prefs')||'{}'));keyStats=JSON.parse(localStorage.getItem('play_key_stats')||'{}')}catch{}
+function saveStructured(){try{localStorage.setItem('play_structured_prefs',JSON.stringify(prefs));localStorage.setItem('play_key_stats',JSON.stringify(keyStats))}catch{}}
+function noteName(pc){return ['C','C♯/D♭','D','E♭','E','F','F♯/G♭','G','A♭','A','B♭','B'][(pc+12)%12]}
+function scalePcs(key,formula){return FORMULAS[formula].map(x=>(KEY_PC[key]+x)%12)}
+function adaptiveKey(){const vals=KEYS.map(([id])=>{const s=keyStats[id]||{seen:0,hard:0,good:0};return {id,w:1+s.hard*2+Math.max(0,2.5-s.seen*.12)-s.good*.08}});let r=Math.random()*vals.reduce((a,b)=>a+b.w,0);for(const x of vals){r-=x.w;if(r<=0)return x.id}return 'C'}
+function sameIdeaNewKey(){const i=KEYS.findIndex(x=>x[0]===prefs.key);prefs.key=KEYS[(i+5)%12][0];saveStructured();renderPracticeHub()}
+function allKeys(){prefs.key=adaptiveKey();saveStructured();renderPracticeHub()}
+function stringCandidate(pc,position=5,lastMidi=-1){const tune=[64,59,55,50,45,40],c=[];for(let si=5;si>=0;si--)for(let fret=Math.max(0,position-1);fret<=Math.min(17,position+5);fret++){const m=tune[si]+fret;if(m%12===pc&&m>lastMidi)c.push({si,fret,midi:m})}return c.sort((a,b)=>a.midi-b.midi||a.fret-b.fret)[0]||null}
+function mkEvent(n,d=.125){const tab=[null,null,null,null,null,null];tab[n.si]=n.fret;const finger=n.fret>=5&&n.fret<=8?n.fret-4:null;return [d,tab,n.midi,finger]}
+function generatedScaleExercise(){const pcs=scalePcs(prefs.key,prefs.scale),seq=[];let last=-1;for(const pc of pcs){let n=stringCandidate(pc,5,last);if(!n){last=-1;n=stringCandidate(pc,5,last)}if(n){seq.push(n);last=n.midi}}let order=[...seq];if(prefs.mode==='Sequenzen'){order=[];for(let i=0;i<seq.length-2;i++)order.push(seq[i],seq[i+1],seq[i+2])}else if(prefs.mode==='Thirds'){order=[];for(let i=0;i<seq.length-2;i++)order.push(seq[i],seq[i+2])}else if(prefs.mode==='Intervalle'){order=[];for(let i=1;i<seq.length;i++)order.push(seq[0],seq[i])}else if(prefs.mode==='Triads'||prefs.mode==='Arpeggios'){order=[seq[0],seq[2],seq[4],seq[2],seq[0]].filter(Boolean)}else if(prefs.mode==='Improvisation'){order=[seq[0],seq[2],seq[1],seq[4],seq[3],seq[5],seq[4],seq[0]].filter(Boolean)};const events=[];for(let r=0;r<4;r++)for(const n of order)events.push(mkEvent(n,prefs.mode==='Auf / ab'?.125:.125));return {id:'generated-structured',title:`${prefs.key} ${prefs.scale==='major'?'Major':prefs.scale==='naturalMinor'?'Natural Minor':prefs.scale} · ${prefs.mode}`,level:'Adaptive',bpm:prefs.tempo,goal:'Dieselbe musikalische Idee in Tonart, Shape und Anwendung vertiefen.',events,type:'exercise'} }
+function findFamilyExercise(f){const ex=EX.filter(x=>(x.type||'exercise')==='exercise');if(f==='scales'||f==='triads'||f==='fretboard')return generatedScaleExercise();if(f==='rhythm')return ex.find(x=>/rhythm|akkord/i.test(x.title))||ex[0];if(f==='technique')return ex.find(x=>/spider|alternate|legato|string/i.test(x.title))||ex[0];return ex.find(x=>/pent|scale|arp/i.test(x.title))||ex[0]}
+function songMoments(f){const s=EX.filter(x=>(x.type||'exercise')==='song');if(f==='rhythm')return s.filter((_,i)=>i%2===0).slice(0,3);if(f==='scales'||f==='triads'||f==='fretboard')return s.filter((_,i)=>i%3!==0).slice(0,3);return s.slice(0,3)}
+function connectionText(){const pcs=scalePcs(prefs.key,prefs.scale);const tri=[pcs[0],pcs[2],pcs[4]].map(noteName).join(' – ');return `${prefs.key}: Scale → Intervalle → 1–3–5 (${tri}) → Triad → Arpeggio → Chord`}
+
+let coachShift=0;
+try{coachShift=Number(localStorage.getItem('play_coach_shift')||0)}catch{}
+function seededChoice(arr,seed){return arr[Math.abs(seed)%arr.length]}
+function daySeed(){const d=new Date();return d.getFullYear()*400+d.getMonth()*31+d.getDate()+coachShift}
+function weakestKey(){
+ const ranked=KEYS.map(([id])=>{const s=keyStats[id]||{seen:0,hard:0,good:0};return {id,score:s.hard*3-s.good*.4-s.seen*.12+(s.seen===0?1.4:0)}}).sort((a,b)=>b.score-a.score);
+ return ranked[0]?.id||'C';
+}
+function coachPlan(){
+ const seed=daySeed();
+ const mainFamily=seededChoice(['scales','rhythm','triads','fretboard'],seed+2);
+ const key=Object.keys(keyStats).length?weakestKey():seededChoice(['C','G','A','D','E','Bb'],seed+4);
+ const scale=mainFamily==='rhythm'?'major':seededChoice(['major','naturalMinor','pentMinor'],seed+6);
+ const fam=FAMILIES.find(f=>f.id===mainFamily)||FAMILIES[0];
+ const mode=seededChoice(fam.modes,seed+8);
+ const warm=seededChoice(['technique','scales','rhythm'],seed);
+ const tempo=mainFamily==='rhythm'?72:66;
+ const application=seed%2?'song':'ear';
+ return [
+   {family:warm,key,scale,mode:FAMILIES.find(f=>f.id===warm)?.modes?.[0]||'Normal',tempo:56,label:'Warm-up',minutes:4},
+   {family:mainFamily,key,scale,mode,tempo,label:'Hauptübung',minutes:8},
+   {family:application,key,scale,mode:'Anwendung',tempo,label:application==='song'?'Song-Anwendung':'Hör-Anwendung',minutes:5}
+ ];
+}
+function coachReason(plan){
+ const s=keyStats[plan.key];
+ if(!s||s.seen===0)return `${KEYS.find(k=>k[0]===plan.key)?.[1]||plan.key} kommt heute bewusst dran, damit du nicht nur die typischen Gitarrentonarten wiederholst.`;
+ if(s.hard>s.good)return `${KEYS.find(k=>k[0]===plan.key)?.[1]||plan.key} war zuletzt vergleichsweise schwierig und wird deshalb häufiger eingestreut.`;
+ return `PLAY. gibt dir heute Technik, musikalischen Inhalt und Anwendung vor. Du musst vor dem Start nichts konfigurieren.`;
+}
+function applyCoachItem(item){
+ if(item.family==='song'){
+   const songs=songMoments(prefs.family),s=songs[0]||EX.find(x=>(x.type||'exercise')==='song');
+   if(s){current=EX.indexOf(s);currentLibrary='song';render()}return;
+ }
+ if(item.family==='ear'){
+   const pc=scalePcs(item.key,item.scale)[0],midi=60+pc;playTone(midi,audio().currentTime+.05,.6);return;
+ }
+ prefs.family=item.family;prefs.key=item.key;prefs.scale=item.scale;prefs.mode=item.mode;prefs.tempo=item.tempo;saveStructured();
+ let ex=findFamilyExercise(item.family);
+ if(ex.id==='generated-structured'){const old=EX.findIndex(x=>x.id===ex.id);if(old>=0)EX.splice(old,1);EX.unshift(ex);current=0}else current=EX.indexOf(ex);
+ currentLibrary='exercise';render();
+}
+function nextCoachPlan(){coachShift++;try{localStorage.setItem('play_coach_shift',coachShift)}catch{}renderPracticeHub()}
+
+function renderPracticeHub(){
+ const hub=document.getElementById('practiceHub');if(!hub)return;
+ const plan=coachPlan(),main=plan[1],fam=FAMILIES.find(x=>x.id===main.family)||FAMILIES[0];
+ const keyName=KEYS.find(k=>k[0]===main.key)?.[1]||main.key;
+ const songs=songMoments(main.family);
+ hub.innerHTML=`<div class="coachHero">
+   <div><div class="adaptiveTag">PLAY. COACH · DEINE NÄCHSTE SESSION</div><h2>${fam.title} · ${keyName}</h2></div>
+   <div class="coachMeta"><span>${main.mode}</span><span>${main.tempo} BPM</span><span>ca. ${plan.reduce((a,b)=>a+b.minutes,0)} Min.</span></div>
+   <div class="coachWhy">${coachReason(main)}</div>
+   <button class="coachStart" data-coachstart>▶ Session starten</button>
+   <div class="coachQueue">${plan.map((x,i)=>`<div class="queueItem"><div class="queueNo">${i+1}</div><div><b>${x.label}</b><br><small>${x.family==='song'?'musikalisch anwenden':x.family==='ear'?'hören & erkennen':(FAMILIES.find(f=>f.id===x.family)?.title||x.family)+' · '+(x.mode||'')}</small></div><small>${x.minutes} min</small></div>`).join('')}</div>
+   <div class="coachAlt"><button data-other>Andere Empfehlung</button><button data-quickkey>Andere Tonart</button></div>
+   <button class="adjustToggle" data-adjust>Übung selbst anpassen</button>
+ </div>
+ <div class="advancedSettings" data-advanced>
+   <div class="practiceGrid">${FAMILIES.map(f=>`<button class="practiceFamily" data-family="${f.id}"><strong>${f.id===prefs.family?'AKTIV':'BEREICH'}</strong><h3>${f.title}</h3><p>${f.desc}</p></button>`).join('')}</div>
+   <div class="familyPanel"><div><b>${FAMILIES.find(x=>x.id===prefs.family)?.title||''}</b><div class="small">Optional: Tonart, Modus und Tiefe manuell ändern.</div></div>
+   <div class="keygrid">${KEYS.map(([id,name])=>`<button data-key="${id}" class="${id===prefs.key?'active':''}">${name}</button>`).join('')}</div>
+   ${prefs.family==='scales'||prefs.family==='triads'||prefs.family==='fretboard'?`<div class="segRow"><button data-scale="major" class="${prefs.scale==='major'?'active':''}">Major</button><button data-scale="naturalMinor" class="${prefs.scale==='naturalMinor'?'active':''}">Natural Minor</button><button data-scale="pentMinor" class="${prefs.scale==='pentMinor'?'active':''}">Pentatonik</button><button data-scale="blues" class="${prefs.scale==='blues'?'active':''}">Blues</button><button data-scale="harmonicMinor" class="${prefs.scale==='harmonicMinor'?'active':''}">Harmonic Minor</button></div>`:''}
+   <div class="depthRow">${(FAMILIES.find(x=>x.id===prefs.family)?.modes||[]).map(mm=>`<button data-mode="${mm}" class="${mm===prefs.mode?'active':''}">${mm}</button>`).join('')}</div>
+   <div class="familyActions"><button data-allkeys>Alle Tonarten · adaptiv</button><button data-newkey>Same idea, new key</button></div>
+   <div class="connection"><b>Fretboard Connection</b><div class="connectionFlow"><span>Scale</span><b>→</b><span>Intervalle</span><b>→</b><span>Triads</span><b>→</b><span>Arpeggio</span><b>→</b><span>Chord</span></div><div class="small">${connectionText()}</div></div>
+   <div class="familyActions"><button data-openpractice>▶ Diese Variante üben</button><button data-ear>♫ Hör-Challenge</button></div>
+   <div class="songMoment"><b>Song-Momente</b><div class="small">Das kannst du jetzt musikalisch anwenden:</div>${songs.map(s=>`<button data-songmoment="${s.id}">${s.title}</button>`).join('')}</div>
+ </div></div>`;
+ hub.querySelector('[data-coachstart]').onclick=()=>startCoachSession(plan);
+ hub.querySelector('[data-other]').onclick=nextCoachPlan;
+ hub.querySelector('[data-quickkey]').onclick=()=>{prefs.key=adaptiveKey();saveStructured();nextCoachPlan()};
+ hub.querySelector('[data-adjust]').onclick=()=>hub.querySelector('[data-advanced]').classList.toggle('open');
+ hub.querySelectorAll('[data-family]').forEach(b=>b.onclick=()=>{prefs.family=b.dataset.family;prefs.mode=FAMILIES.find(x=>x.id===prefs.family).modes[0];saveStructured();renderPracticeHub();setTimeout(()=>document.querySelector('[data-advanced]')?.classList.add('open'),0)});
+ hub.querySelectorAll('[data-key]').forEach(b=>b.onclick=()=>{prefs.key=b.dataset.key;const s=keyStats[prefs.key]||(keyStats[prefs.key]={seen:0,hard:0,good:0});s.seen++;saveStructured();renderPracticeHub();setTimeout(()=>document.querySelector('[data-advanced]')?.classList.add('open'),0)});
+ hub.querySelectorAll('[data-scale]').forEach(b=>b.onclick=()=>{prefs.scale=b.dataset.scale;saveStructured();renderPracticeHub();setTimeout(()=>document.querySelector('[data-advanced]')?.classList.add('open'),0)});
+ hub.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{prefs.mode=b.dataset.mode;saveStructured();renderPracticeHub();setTimeout(()=>document.querySelector('[data-advanced]')?.classList.add('open'),0)});
+ hub.querySelector('[data-allkeys]').onclick=allKeys;hub.querySelector('[data-newkey]').onclick=sameIdeaNewKey;
+ hub.querySelector('[data-openpractice]').onclick=()=>{let ex=findFamilyExercise(prefs.family);if(ex.id==='generated-structured'){const old=EX.findIndex(x=>x.id===ex.id);if(old>=0)EX.splice(old,1);EX.unshift(ex);current=0}else current=EX.indexOf(ex);currentLibrary='exercise';render()};
+ hub.querySelector('[data-ear]').onclick=()=>{const pc=scalePcs(prefs.key,prefs.scale)[0],midi=60+pc;playTone(midi,audio().currentTime+.05,.5)};
+ hub.querySelectorAll('[data-songmoment]').forEach(b=>b.onclick=()=>{const i=EX.findIndex(x=>x.id===b.dataset.songmoment);if(i>=0){current=i;currentLibrary='song';render()}});
+}
+function renderLearnHub(){const hub=document.getElementById('practiceHub');hub.innerHTML=`<div class="learnGrid"><button class="learnCard" data-learn="scales"><span class="adaptiveTag">PFAD</span><b>Tonleiter → Intervalle → Triads → Arpeggio</b><div class="small">Ein Tonmaterial, mehrere musikalische Anwendungen.</div></button><button class="learnCard" data-learn="rhythm"><span class="adaptiveTag">PFAD</span><b>Rhythm → Chords → Song</b><div class="small">Isoliert lernen, musikalisch anwenden, Song-Moment spielen.</div></button><button class="learnCard" data-learn="fretboard"><span class="adaptiveTag">PFAD</span><b>Fretboard Connections</b><div class="small">Horizontal, vertikal, Positionswechsel und CAGED.</div></button><button class="learnCard" data-learn="ear"><span class="adaptiveTag">PFAD</span><b>Ear → Play</b><div class="small">Grundton und Intervalle direkt an deinen aktuellen Inhalten hören.</div></button></div>`;hub.querySelectorAll('[data-learn]').forEach(b=>b.onclick=()=>{prefs.family=b.dataset.learn;currentLibrary='practice';render()})}
+
+let current=0,currentLibrary='practice',ctx=null,run=null,raf=0,nodes=[];
 const list=document.getElementById('exerciseList'),score=document.getElementById('score'),bpmSel=document.getElementById('bpm'),countSel=document.getElementById('count'),guideSel=document.getElementById('guide'),fingeringSel=document.getElementById('fingering'),statusEl=document.getElementById('status'),clockEl=document.getElementById('clock'),scroller=document.getElementById('scroller'),beats=[...document.querySelectorAll('#metro i')];
 const stringY=[272,306,340,374,408,442], staffY=[62,76,90,104,118];
 const stringMidi=[64,59,55,50,45,40]; // e B G D A E
@@ -609,19 +755,93 @@ function renderScore(){
  s+=`<text x="52" y="515" font-size="10" fill="#6f6b65" font-weight="700">RHYTHMUS</text>`;
  score.innerHTML=s;
 }
+
+
+let activeCoachStep=null;
+let coachPlanState=null;
+try{coachPlanState=JSON.parse(localStorage.getItem('play_coach_active')||'null')}catch{}
+function coachRule(item){
+ if(item.label==='Warm-up')return 'Ziel: im vorgegebenen Tempo locker spielen. PLAY. wiederholt die Übung automatisch und beendet den Schritt nach dem aktuellen vollständigen Durchgang, sobald die Zielzeit erreicht ist.';
+ if(item.label==='Hauptübung')return 'Ziel: sauber im vorgegebenen Tempo spielen. Nicht während des Schritts an Tempo, Tonart oder Modus drehen – diese Entscheidung hat PLAY. bereits für diese Session getroffen.';
+ return 'Ziel: die Technik musikalisch anwenden. Der Schritt endet nach einem vollständigen Durchgang, sobald die vorgesehene Zeit erreicht ist.';
+}
+function startCoachSession(plan){
+ coachPlanState={plan,index:0,startedAt:Date.now()};
+ try{localStorage.setItem('play_coach_active',JSON.stringify(coachPlanState))}catch{}
+ launchCoachIndex(0);
+}
+function launchCoachIndex(i){
+ if(!coachPlanState||!coachPlanState.plan?.[i])return finishCoachSession();
+ coachPlanState.index=i;try{localStorage.setItem('play_coach_active',JSON.stringify(coachPlanState))}catch{}
+ const item=coachPlanState.plan[i];
+ activeCoachStep={item,index:i,targetSec:item.minutes*60,startedAt:null,runs:0,finished:false};
+ applyCoachItem(item);
+}
+
+function pauseCoachClock(){
+ if(!activeCoachStep?.startedAt)return;
+ const now=performance.now();
+ activeCoachStep.accumulated=(activeCoachStep.accumulated||0)+(now-activeCoachStep.startedAt);
+ activeCoachStep.startedAt=null;
+ paintCoachStep();
+}
+
+function coachElapsed(){
+ if(!activeCoachStep)return 0;return ((activeCoachStep.accumulated||0)+(activeCoachStep.startedAt?(performance.now()-activeCoachStep.startedAt):0))/1000;
+}
+function paintCoachStep(){
+ const box=document.getElementById('coachStepBanner');if(!box)return;
+ if(!activeCoachStep){box.className='coachStepBanner';box.innerHTML='';document.body.classList.remove('coachLocked');return}
+ document.body.classList.add('coachLocked');
+ const item=activeCoachStep.item, elapsed=coachElapsed(), p=Math.min(100,elapsed/activeCoachStep.targetSec*100);
+ box.className='coachStepBanner on';
+ box.innerHTML=`<div class="top"><b>Jetzt ${activeCoachStep.index+1}/${coachPlanState?.plan?.length||3}: ${item.label}</b><button id="coachAbort" style="border:0;background:transparent;font-size:10px;text-decoration:underline">Session abbrechen</button><span>${Math.floor(elapsed/60)}:${String(Math.floor(elapsed%60)).padStart(2,'0')} / ${item.minutes}:00</span></div><div class="rule">${coachRule(item)}</div><div class="progressbar"><i style="width:${p}%"></i></div><span>${item.tempo} BPM · ${KEYS.find(k=>k[0]===item.key)?.[1]||item.key} · ${item.mode||''} · Durchgänge: ${activeCoachStep.runs}</span>`;
+ const abortBtn=document.getElementById('coachAbort');if(abortBtn)abortBtn.onclick=abortCoachSession;
+}
+function finishCoachStep(){
+ if(!activeCoachStep||activeCoachStep.finished)return;
+ activeCoachStep.finished=true;stopAll();
+ paintCoachStep();
+ const box=document.getElementById('coachStepBanner');
+ const isLast=(activeCoachStep.index+1)>=(coachPlanState?.plan?.length||0);
+ box.insertAdjacentHTML('beforeend',`<div class="coachDone"><b>${activeCoachStep.item.label} geschafft.</b><span>${activeCoachStep.runs} vollständige Durchgänge · ${Math.round(coachElapsed())} Sek. aktive Schrittzeit</span><button id="coachContinue">${isLast?'Session abschließen':'Weiter zum nächsten Schritt'}</button></div>`);
+ document.getElementById('coachContinue').onclick=()=>{if(isLast)finishCoachSession();else launchCoachIndex(activeCoachStep.index+1)};
+}
+function finishCoachSession(){
+ activeCoachStep=null;coachPlanState=null;try{localStorage.removeItem('play_coach_active')}catch{}
+ document.body.classList.remove('coachLocked');currentLibrary='practice';render();
+}
+function abortCoachSession(){
+ stopAll();activeCoachStep=null;coachPlanState=null;try{localStorage.removeItem('play_coach_active')}catch{}
+ document.body.classList.remove('coachLocked');currentLibrary='practice';render();
+}
+
+function pendingCoach(){return []}
+function takeNextCoach(){}
+
 function render(){
+ const hub=document.getElementById('practiceHub');
+ document.querySelectorAll('[data-library]').forEach(b=>b.classList.toggle('active',b.dataset.library===currentLibrary));
+ if(currentLibrary==='practice'){list.style.display='none';hub.style.display='grid';paintCoachStep();renderPracticeHub();document.getElementById('title').textContent='Practice';document.getElementById('goal').textContent='PLAY. sagt dir, was jetzt dran ist. Optionen gibt es nur unter Anpassen.';return}
+ if(currentLibrary==='learn'){list.style.display='none';hub.style.display='grid';renderLearnHub();document.getElementById('title').textContent='Lernen';document.getElementById('goal').textContent='Lernen → isoliert üben → musikalisch anwenden → Song spielen.';return}
+ hub.style.display='none';list.style.display='flex';
  const available=EX.map((e,i)=>({e,i})).filter(x=>(x.e.type||'exercise')===currentLibrary);
  if(!available.some(x=>x.i===current))current=available[0]?.i??0;
  list.innerHTML=available.map(({e,i})=>`<button data-i="${i}" class="${i===current?'active':''}"><b>${e.title}</b><br><span style="font-size:9px;opacity:.75">${e.level}</span></button>`).join('');
- document.querySelectorAll('[data-library]').forEach(b=>b.classList.toggle('active',b.dataset.library===currentLibrary));
  document.getElementById('title').textContent=EX[current].title;document.getElementById('goal').textContent=EX[current].goal;document.getElementById('musicText').textContent=musicText(EX[current])+(EX[current].source?` Quelle/Arrangement: ${EX[current].source}.`:'');
+
  bpmSel.innerHTML=[40,50,55,60,65,70,75,80,90,100,110,120,140].map(v=>`<option ${v===EX[current].bpm?'selected':''}>${v}</option>`).join('');
+ if(activeCoachStep){
+   if(![...bpmSel.options].some(o=>Number(o.value)===activeCoachStep.item.tempo)){const o=document.createElement('option');o.value=o.textContent=activeCoachStep.item.tempo;bpmSel.appendChild(o)}
+   bpmSel.value=String(activeCoachStep.item.tempo);countSel.value='1';guideSel.value='on';fingeringSel.value='on';
+ }
+ paintCoachStep();
  list.querySelectorAll('button').forEach(b=>b.onclick=()=>{stopAll();current=+b.dataset.i;render()});
- document.querySelectorAll('[data-library]').forEach(b=>b.onclick=()=>{stopAll();currentLibrary=b.dataset.library;render()});
  renderScore();
 }
 function start(){
  stopAll();
+ if(activeCoachStep&&!activeCoachStep.startedAt)activeCoachStep.startedAt=performance.now();
  const ex=EX[current],c=audio();c.resume?.();
  const bpm=+bpmSel.value,beat=60/bpm,countBars=+countSel.value,countDur=countBars*4*beat;
  const durations=ex.events.map(ev=>ev[0]*4*beat),eventStart=[0];
@@ -650,7 +870,16 @@ function start(){
      raf=requestAnimationFrame(frame);return;
    }
    const elapsed=now-playAt;
-   if(elapsed>=total){stopAll();statusEl.textContent='Fertig';return}
+   if(elapsed>=total){
+     if(activeCoachStep&&!activeCoachStep.finished){
+       activeCoachStep.runs++;
+       const reached=coachElapsed()>=activeCoachStep.targetSec;
+       stopAll();
+       if(reached){statusEl.textContent='Schritt geschafft';finishCoachStep();return}
+       statusEl.textContent='Nächster Durchgang…';paintCoachStep();setTimeout(()=>{if(activeCoachStep&&!activeCoachStep.finished)start()},350);return
+     }
+     stopAll();statusEl.textContent='Fertig';return
+   }
 
    let i=0;
    while(i<durations.length-1 && elapsed>=eventStart[i+1])i++;
@@ -663,14 +892,54 @@ function start(){
    beats.forEach((b,k)=>b.classList.toggle('on',k===bi));
    statusEl.textContent=`Spielen · ${durName(ex.events[i][0])||'Achtel'}`;
    const secs=Math.floor(elapsed);
-   clockEl.textContent=`${Math.floor(secs/60)}:${String(secs%60).padStart(2,'0')}`;
+   clockEl.textContent=`${Math.floor(secs/60)}:${String(secs%60).padStart(2,'0')}`;if(activeCoachStep)paintCoachStep();
    raf=requestAnimationFrame(frame)
  }
  raf=requestAnimationFrame(frame)
 }
 document.getElementById('play').onclick=()=>run?stopAll():start();
-document.getElementById('stop').onclick=stopAll;bpmSel.onchange=()=>{if(run)start()};countSel.onchange=()=>{if(run)start()};guideSel.onchange=()=>{if(run)start()};fingeringSel.onchange=()=>{renderScore()};
+document.getElementById('stop').onclick=()=>{if(activeCoachStep){pauseCoachClock();stopAll();statusEl.textContent='Pausiert · PLAY zum Fortsetzen'}else stopAll()};bpmSel.onchange=()=>{if(run)start()};countSel.onchange=()=>{if(run)start()};guideSel.onchange=()=>{if(run)start()};fingeringSel.onchange=()=>{renderScore()};
 document.addEventListener('visibilitychange',()=>{if(document.hidden)stopAll()});
-render();
+document.querySelectorAll('[data-library]').forEach(b=>b.onclick=()=>{if(coachPlanState)return;stopAll();currentLibrary=b.dataset.library;render()});
+if(coachPlanState?.plan?.length){launchCoachIndex(coachPlanState.index||0)}else render();
+
+
+const PLAY_BACKUP_KEYS=[
+ 'play_prefs_v3','play_keystats_v3','play_coach_shift','play_coach_active','play_coach_queue',
+ 'play_structured_prefs','play_structured_keystats','play_learn_v1'
+];
+function backupPayload(){
+ const data={};
+ for(let i=0;i<localStorage.length;i++){
+   const k=localStorage.key(i);
+   if(k && (k.startsWith('play_')||k.startsWith('PLAY_'))) data[k]=localStorage.getItem(k);
+ }
+ return {app:'PLAY. Guitar',schema:1,createdAt:new Date().toISOString(),data};
+}
+function exportBackup(){
+ const payload=backupPayload(),blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+ a.download=`PLAY-Guitar-backup-${new Date().toISOString().slice(0,10)}.json`;a.click();
+ setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+ document.getElementById('backupStatus').textContent='Backup erstellt.';
+}
+async function importBackup(file){
+ try{
+   const obj=JSON.parse(await file.text());
+   if(obj?.app!=='PLAY. Guitar'||!obj.data||typeof obj.data!=='object')throw new Error('Ungültiges PLAY.-Backup');
+   Object.entries(obj.data).forEach(([k,v])=>{if(k.startsWith('play_')||k.startsWith('PLAY_'))localStorage.setItem(k,String(v))});
+   document.getElementById('backupStatus').textContent='Backup wiederhergestellt. App wird neu geladen …';
+   setTimeout(()=>location.reload(),450);
+ }catch(e){document.getElementById('backupStatus').textContent='Backup konnte nicht gelesen werden: '+e.message}
+}
+function resetPlayData(){
+ if(!confirm('Wirklich alle lokalen PLAY.-Daten löschen? Erstelle vorher am besten ein Backup.'))return;
+ [...Array(localStorage.length)].map((_,i)=>localStorage.key(i)).filter(k=>k&&(k.startsWith('play_')||k.startsWith('PLAY_'))).forEach(k=>localStorage.removeItem(k));
+ location.reload();
+}
+document.getElementById('backupExport')?.addEventListener('click',exportBackup);
+document.getElementById('backupImport')?.addEventListener('change',e=>{const f=e.target.files?.[0];if(f)importBackup(f)});
+document.getElementById('backupReset')?.addEventListener('click',resetPlayData);
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}))}
 </script>
 </body></html>
