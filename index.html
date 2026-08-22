@@ -38,6 +38,11 @@ header{display:flex;justify-content:space-between;align-items:end;margin-bottom:
 .coachStepBanner .rule{font-size:11px;line-height:1.4}.coachStepBanner .progressbar{height:7px;background:#ddd7cf;border-radius:99px;overflow:hidden}.coachStepBanner .progressbar i{display:block;height:100%;width:0;background:var(--accent)}
 .coachDone{display:grid;gap:8px;padding:12px;border:1px solid var(--line);border-radius:15px;background:#fff;margin-top:10px}.coachDone button{min-height:44px;border:0;border-radius:12px;background:var(--ink);color:#fff;font-weight:900}
 .coachLocked #freeControls{display:none}.coachLocked .librarySwitch{display:none}
+
+.learnCard{min-height:92px;text-align:left;cursor:pointer;touch-action:manipulation}
+.learnCard:active{transform:scale(.99)}
+.learnGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media(max-width:620px){.learnGrid{grid-template-columns:1fr}}
 </style>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#171717">
@@ -678,7 +683,46 @@ function renderPracticeHub(){
  hub.querySelector('[data-ear]').onclick=()=>{const pc=scalePcs(prefs.key,prefs.scale)[0],midi=60+pc;playTone(midi,audio().currentTime+.05,.5)};
  hub.querySelectorAll('[data-songmoment]').forEach(b=>b.onclick=()=>{const i=EX.findIndex(x=>x.id===b.dataset.songmoment);if(i>=0){current=i;currentLibrary='song';render()}});
 }
-function renderLearnHub(){const hub=document.getElementById('practiceHub');hub.innerHTML=`<div class="learnGrid"><button class="learnCard" data-learn="scales"><span class="adaptiveTag">PFAD</span><b>Tonleiter → Intervalle → Triads → Arpeggio</b><div class="small">Ein Tonmaterial, mehrere musikalische Anwendungen.</div></button><button class="learnCard" data-learn="rhythm"><span class="adaptiveTag">PFAD</span><b>Rhythm → Chords → Song</b><div class="small">Isoliert lernen, musikalisch anwenden, Song-Moment spielen.</div></button><button class="learnCard" data-learn="fretboard"><span class="adaptiveTag">PFAD</span><b>Fretboard Connections</b><div class="small">Horizontal, vertikal, Positionswechsel und CAGED.</div></button><button class="learnCard" data-learn="ear"><span class="adaptiveTag">PFAD</span><b>Ear → Play</b><div class="small">Grundton und Intervalle direkt an deinen aktuellen Inhalten hören.</div></button></div>`;hub.querySelectorAll('[data-learn]').forEach(b=>b.onclick=()=>{prefs.family=b.dataset.learn;currentLibrary='practice';render()})}
+const LEARN_PATHS={
+ scales:{title:'Tonleiter → Musik',intro:'Du lernst nicht nur ein Shape. PLAY. führt dich vom Tonmaterial bis zur musikalischen Anwendung.',steps:[
+  ['1','Tonleiter verstehen','Grundton, Intervalle und Aufbau kurz verstehen.','scales'],
+  ['2','Auf dem Griffbrett','Die Tonleiter in einer Position sauber spielen.','scales'],
+  ['3','Intervalle erkennen','Nicht nur Bundnummern sehen: 1, 2, 3, 4, 5, 6, 7 erkennen.','fretboard'],
+  ['4','1–3–5 herausziehen','Aus derselben Scale eine Triad bilden.','triads'],
+  ['5','Triad & Inversions','Dieselben drei Töne an anderen Stellen verbinden.','triads'],
+  ['6','Arpeggio spielen','Die Akkordtöne melodisch über das Griffbrett spielen.','triads'],
+  ['7','Musikalisch anwenden','Das Material in Phrase, Akkordfolge oder Song-Moment benutzen.','song']
+ ]},
+ rhythm:{title:'Rhythm → Song',intro:'Puls und Notenwerte werden direkt gespielt – nicht nur beschrieben.',steps:[
+  ['1','Puls fühlen','Viertelpuls hören und mitspielen.','rhythm'],['2','Achtel','1 + 2 + 3 + 4 + sauber unterteilen.','rhythm'],['3','Sechzehntel','Vier Unterteilungen pro Beat kontrollieren.','rhythm'],['4','Akkordwechsel','Rhythmus trotz Griffwechsel stabil halten.','rhythm'],['5','Groove','Akzente und Synkopen musikalisch einsetzen.','rhythm'],['6','Song-Moment','Den Rhythmus in Musik anwenden.','song']
+ ]},
+ fretboard:{title:'Fretboard Connections',intro:'PLAY. verbindet Positionen, statt einzelne Griffbilder auswendig lernen zu lassen.',steps:[
+  ['1','Eine Position','Töne sicher in einer Lage finden.','fretboard'],['2','Horizontal','Auf einer Saite über den Hals denken.','fretboard'],['3','Vertikal','Saitenübergreifend in einer Lage verbinden.','fretboard'],['4','Positionswechsel','Zwischen benachbarten Bereichen wechseln.','fretboard'],['5','CAGED','Akkordform, Triad und Scale miteinander verbinden.','fretboard'],['6','Freie Verbindung','Ohne starre Box über das Griffbrett spielen.','scales']
+ ]},
+ ear:{title:'Ear → Play',intro:'Du hörst genau das Material, das du anschließend auf der Gitarre spielst.',steps:[
+  ['1','Grundton','Den Ruhepunkt einer Tonart hören.','ear'],['2','Intervalle','Abstände zum Grundton unterscheiden.','ear'],['3','Triad','Dur/Moll und 1–3–5 als Klang erkennen.','ear'],['4','Nachspielen','Kurze Phrase hören und auf der Gitarre suchen.','ear'],['5','Anwenden','Gehör und Griffbrett im musikalischen Kontext verbinden.','song']
+ ]}
+};
+let learnOpen=null;
+function renderLearnHub(){
+ const hub=document.getElementById('practiceHub');
+ if(!learnOpen){
+   hub.innerHTML=`<div class="learnGrid">${Object.entries(LEARN_PATHS).map(([id,p])=>`<button class="learnCard" data-learn="${id}"><span class="adaptiveTag">LERNPFAD</span><b>${p.title}</b><div class="small">${p.intro}</div><div class="small" style="margin-top:6px">${p.steps.length} Schritte · antippen zum Öffnen</div></button>`).join('')}</div>`;
+   hub.querySelectorAll('[data-learn]').forEach(b=>b.onclick=()=>{learnOpen=b.dataset.learn;renderLearnHub()});
+   return;
+ }
+ const p=LEARN_PATHS[learnOpen];
+ hub.innerHTML=`<div class="familyPanel"><div class="familyTop"><button class="secondary" data-back>← Lernpfade</button><div><b>${p.title}</b><div class="small">${p.intro}</div></div></div>
+ <div class="learnGrid">${p.steps.map((s,i)=>`<button class="learnCard" data-step="${i}"><span class="adaptiveTag">SCHRITT ${s[0]}</span><b>${s[1]}</b><div class="small">${s[2]}</div><div class="small" style="margin-top:6px">▶ Jetzt machen</div></button>`).join('')}</div></div>`;
+ hub.querySelector('[data-back]').onclick=()=>{learnOpen=null;renderLearnHub()};
+ hub.querySelectorAll('[data-step]').forEach(b=>b.onclick=()=>{
+   const s=p.steps[+b.dataset.step],target=s[3];
+   if(target==='song'){const song=EX.find(x=>(x.type||'exercise')==='song');if(song){current=EX.indexOf(song);currentLibrary='song';render()}return}
+   if(target==='ear'){const pc=scalePcs(prefs.key,prefs.scale)[0];playTone(60+pc,audio().currentTime+.05,.7);return}
+   prefs.family=target;prefs.mode=(FAMILIES.find(f=>f.id===target)?.modes||['Normal'])[0];saveStructured();currentLibrary='practice';renderPracticeHub();
+   setTimeout(()=>document.querySelector('[data-adjust]')?.click(),0);
+ });
+}
 
 let current=0,currentLibrary='practice',ctx=null,run=null,raf=0,nodes=[];
 const list=document.getElementById('exerciseList'),score=document.getElementById('score'),bpmSel=document.getElementById('bpm'),countSel=document.getElementById('count'),guideSel=document.getElementById('guide'),fingeringSel=document.getElementById('fingering'),statusEl=document.getElementById('status'),clockEl=document.getElementById('clock'),scroller=document.getElementById('scroller'),beats=[...document.querySelectorAll('#metro i')];
