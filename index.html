@@ -1,0 +1,676 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#f6f3ee">
+<title>PLAY. Notation Practice</title>
+<style>
+:root{--bg:#f6f3ee;--card:#fff;--ink:#171717;--muted:#6f6b65;--line:#ded9d1;--accent:#8064a2;--soft:#efe8f5}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",Arial,sans-serif;overflow-x:hidden}
+button,select{font:inherit}.app{max-width:900px;margin:auto;padding:max(16px,env(safe-area-inset-top)) 12px max(30px,env(safe-area-inset-bottom))}
+header{display:flex;justify-content:space-between;align-items:end;margin-bottom:14px}.brand{font-size:28px;font-weight:950;letter-spacing:-1px}.sub{font-size:11px;color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:14px;margin-bottom:12px}h1{font-size:24px;margin:0 0 5px;letter-spacing:-.5px}p{margin:0;color:var(--muted);line-height:1.45}
+.librarySwitch{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}.librarySwitch button{min-height:42px;border:1px solid var(--line);border-radius:12px;background:#fbfaf8;font-weight:850}.librarySwitch button.active{background:var(--ink);color:#fff}.exercise-list{display:flex;gap:8px;overflow:auto;padding-bottom:4px;scrollbar-width:none}.exercise-list button{border:1px solid var(--line);background:var(--card);border-radius:14px;padding:10px 12px;white-space:nowrap;text-align:left}.exercise-list button.active{background:var(--ink);color:white}
+.controls{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.control{border:1px solid var(--line);border-radius:14px;padding:9px;background:#fbfaf8}.control label{display:block;font-size:9px;color:var(--muted);font-weight:850}.control select{width:100%;border:0;background:transparent;font-weight:850;outline:0}
+.transport{display:grid;grid-template-columns:1fr auto;gap:8px;margin:10px 0}.play{min-height:50px;border:0;border-radius:15px;background:var(--ink);color:white;font-weight:900}.stop{min-width:78px;border:1px solid var(--line);border-radius:15px;background:white;font-weight:900}
+.status{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:8px}.metro{display:flex;gap:4px;margin:7px 0}.metro i{height:7px;flex:1;border-radius:999px;background:#ddd7cf}.metro i.on{background:var(--accent)}
+.scorewrap{position:relative;border:1px solid var(--line);border-radius:16px;background:#fff;overflow:hidden;padding-bottom:6px}svg{display:block;width:100%;height:auto;min-width:700px}.scoreScroller{overflow-x:auto;overflow-y:hidden;scrollbar-width:none}.playhead{position:absolute;top:0;bottom:0;width:2px;background:var(--accent);left:90px;z-index:4;pointer-events:none}
+.legend{display:flex;gap:6px;overflow:auto;margin-top:8px}.legend span{font-size:9px;border:1px solid var(--line);padding:5px 7px;border-radius:9px;white-space:nowrap;color:var(--muted)}
+.music{display:grid;grid-template-columns:1fr 1fr;gap:8px}.music div{background:#fbfaf8;border:1px solid var(--line);border-radius:14px;padding:10px}.music b{font-size:12px}.music p{font-size:11px;margin-top:4px}
+@media(max-width:700px){.controls{grid-template-columns:1fr 1fr}.control:last-child{grid-column:1/-1}.music{grid-template-columns:1fr}.card{border-radius:16px;padding:11px}h1{font-size:21px}}
+
+.fingerTag{font-size:9px;font-weight:900;fill:#8064a2}
+.tabFret{font-size:13px;font-weight:800}
+</style>
+</head>
+<body>
+<main class="app">
+<header><div><div class="brand">PLAY.</div><div class="sub">40 Übungen · 10 Songs · Noten + TAB + Timing</div></div><div class="sub">Noten + TAB + Timing</div></header>
+<section class="card">
+<div class="librarySwitch"><button class="active" data-library="exercise">Übungen</button><button data-library="song">Songs</button></div>
+<div class="exercise-list" id="exerciseList"></div>
+</section>
+<section class="card">
+<h1 id="title"></h1><p id="goal"></p>
+<div class="controls">
+<div class="control"><label>TEMPO</label><select id="bpm"></select></div>
+<div class="control"><label>COUNT-IN</label><select id="count"><option value="1">1 Takt</option><option value="2">2 Takte</option><option value="0">Keiner</option></select></div>
+<div class="control"><label>GUIDE-TON</label><select id="guide"><option value="on">An</option><option value="off">Aus</option></select></div>
+<div class="control"><label>FINGERSATZ</label><select id="fingering"><option value="on" selected>An</option><option value="off">Aus</option></select></div>
+</div>
+<div class="transport"><button id="play" class="play">▶ PLAY ALONG</button><button id="stop" class="stop">STOP</button></div>
+<div class="status"><span id="status">Bereit</span><span id="clock">0:00</span></div>
+<div class="metro" id="metro"><i></i><i></i><i></i><i></i></div>
+<div class="scorewrap"><div class="playhead"></div><div class="scoreScroller" id="scroller"><svg id="score" viewBox="0 0 1200 560" preserveAspectRatio="xMinYMin meet"></svg></div></div>
+<div class="legend"><span>𝅘𝅥 Viertel</span><span>♫ Achtel</span><span>𝅗𝅥 Halbe</span><span>𝄽 Pause</span><span><b>1</b> Zeige</span><span><b>2</b> Mittel</span><span><b>3</b> Ring</span><span><b>4</b> Kleiner Finger</span><span>Noten und TAB teilen dieselbe Zeitachse</span></div>
+</section>
+<section class="card music"><div><b>Musik verstehen</b><p id="musicText"></p></div><div><b>Übeziel</b><p>Starte langsam. Erhöhe das Tempo erst, wenn Noten, TAB, Metronom und dein Anschlag zusammenliegen.</p></div></section>
+</main>
+<script>
+const EX=[{"id": "ex1", "title": "A-Moll-Pentatonik · Grundphrase", "level": "Einfach", "bpm": 70, "goal": "Puls halten und auf A landen.", "events": [[0.25, [null, null, null, null, 5, null], 45], [0.125, [null, null, null, 5, null, null], 55], [0.125, [null, null, null, 7, null, null], 57], [0.25, [null, null, 5, null, null, null], 60], [0.25, [null, null, 7, null, null, null], 62], [0.125, [null, 5, null, null, null, null], 64], [0.125, [null, 8, null, null, null, null], 67], [0.25, [5, null, null, null, null, null], 69], [0.25, [8, null, null, null, null, null], 72], [0.25, [5, null, null, null, null, null], 69], [0.5, [null, null, 7, null, null, null], 62], [0.25, [null, null, 5, null, null, null], 60], [0.25, [null, null, null, null, 5, null], 45], [0.25, ["R", null, null, null, null, null], null], [0.125, [null, null, null, 5, null, null], 55], [0.125, [null, null, null, 7, null, null], 57], [0.25, [null, null, 5, null, null, null], 60], [0.25, [null, null, null, null, 5, null], 45]]}, {"id": "ex2", "title": "Chromatik 1-2-3-4 · 5. Lage", "level": "Einfach", "bpm": 60, "goal": "Vier Finger gleichmäßig und entspannt bewegen.", "events": [[0.125, [null, null, null, null, null, 5], 41], [0.125, [null, null, null, null, null, 6], 42], [0.125, [null, null, null, null, null, 7], 43], [0.125, [null, null, null, null, null, 8], 44], [0.125, [null, null, null, null, 5, null], 50], [0.125, [null, null, null, null, 6, null], 51], [0.125, [null, null, null, null, 7, null], 52], [0.125, [null, null, null, null, 8, null], 53], [0.125, [null, null, null, 5, null, null], 55], [0.125, [null, null, null, 6, null, null], 56], [0.125, [null, null, null, 7, null, null], 57], [0.125, [null, null, null, 8, null, null], 58], [0.125, [null, null, 5, null, null, null], 60], [0.125, [null, null, 6, null, null, null], 61], [0.125, [null, null, 7, null, null, null], 62], [0.125, [null, null, 8, null, null, null], 63]]}, {"id": "ex3", "title": "Alternate Picking · zwei Saiten", "level": "Einfach", "bpm": 70, "goal": "Ab- und Aufschlag gleich laut halten.", "events": [[0.125, [null, null, null, null, 5, null], 50], [0.125, [null, null, null, null, 7, null], 52], [0.125, [null, null, null, 5, null, null], 55], [0.125, [null, null, null, 7, null, null], 57], [0.125, [null, null, null, null, 7, null], 52], [0.125, [null, null, null, null, 5, null], 50], [0.125, [null, null, null, 7, null, null], 57], [0.125, [null, null, null, 5, null, null], 55], [0.25, [null, null, null, null, 5, null], 50], [0.25, [null, null, null, null, 7, null], 52], [0.25, [null, null, null, 5, null, null], 55], [0.25, [null, null, null, 7, null, null], 57]]}, {"id": "ex4", "title": "Akkordrhythmus · Em – C – G – D", "level": "Einfach", "bpm": 65, "goal": "Akkorde exakt auf Zählzeit 1 wechseln.", "events": [[0.25, ["0", "0", "0", "2", "2", "0"], 52], [0.25, ["0", "0", "0", "2", "2", "0"], 52], [0.25, ["0", "0", "0", "2", "2", "0"], 52], [0.25, ["0", "0", "0", "2", "2", "0"], 52], [0.25, ["0", "1", "0", "2", "3", null], 48], [0.25, ["0", "1", "0", "2", "3", null], 48], [0.25, ["0", "1", "0", "2", "3", null], 48], [0.25, ["0", "1", "0", "2", "3", null], 48], [0.25, ["3", "0", "0", "0", "2", "3"], 43], [0.25, ["3", "0", "0", "0", "2", "3"], 43], [0.25, ["3", "0", "0", "0", "2", "3"], 43], [0.25, ["3", "0", "0", "0", "2", "3"], 43], [0.25, [null, "3", "2", "0", null, null], 50], [0.25, [null, "3", "2", "0", null, null], 50], [0.25, [null, "3", "2", "0", null, null], 50], [0.25, [null, "3", "2", "0", null, null], 50]]}, {"id": "ex5", "title": "Blues · Frage und Antwort", "level": "Mittel", "bpm": 72, "goal": "Phrasieren und Pausen bewusst setzen.", "events": [[0.125, [null, null, null, 5, null, null], 55], [0.125, [null, null, null, 7, null, null], 57], [0.25, [null, null, 5, null, null, null], 60], [0.25, ["R", null, null, null, null, null], null], [0.25, [null, null, 7, null, null, null], 62], [0.125, [null, 5, null, null, null, null], 64], [0.125, [null, 8, null, null, null, null], 67], [0.25, [5, null, null, null, null, null], 69], [0.25, ["R", null, null, null, null, null], null], [0.25, [null, 8, null, null, null, null], 67], [0.125, [null, 5, null, null, null, null], 64], [0.125, [null, null, 7, null, null, null], 62], [0.5, [null, null, null, null, 5, null], 45]]}, {"id": "ex6", "title": "Arpeggio · Am", "level": "Einfach", "bpm": 60, "goal": "Akkordtöne als zusammengehörigen Klang hören.", "events": [[0.25, [null, null, null, null, 0, null], 45], [0.25, [null, null, null, 2, null, null], 57], [0.25, [null, null, 2, null, null, null], 60], [0.25, [null, 1, null, null, null, null], 65], [0.25, [0, null, null, null, null, null], 69], [0.25, [null, 1, null, null, null, null], 65], [0.25, [null, null, 2, null, null, null], 60], [0.25, [null, null, null, 2, null, null], 57], [0.5, [null, null, null, null, 0, null], 45]]}];
+
+// Long spider across the neck: frets 1→12 and back, all six strings.
+// Event format: [duration, tab[6], midi, finger]
+(function(){
+  const events=[];
+  const tuning=[64,59,55,50,45,40]; // e B G D A E
+  const positions=[...Array.from({length:12},(_,i)=>i+1),...Array.from({length:11},(_,i)=>11-i)];
+  for(const pos of positions){
+    for(let si=5;si>=0;si--){
+      for(let finger=1;finger<=4;finger++){
+        const fret=pos+finger-1;
+        const tab=[null,null,null,null,null,null];
+        tab[si]=fret;
+        events.push([0.125,tab,tuning[si]+fret,finger]);
+      }
+    }
+  }
+  EX.unshift({
+    id:'spider-full-neck',
+    title:'Spider · ganzes Griffbrett 1–12–1',
+    level:'Basis',
+    bpm:60,
+    goal:'1–2–3–4 über alle sechs Saiten und Lagen spielen, anschließend kontrolliert zurück.',
+    events
+  });
+})();
+
+
+function pushExercise(id,title,level,bpm,goal,events,type='exercise'){
+  EX.push({id,title,level,bpm,goal,events,type});
+}
+function singleNoteEvent(d,si,fret,finger=null){
+  const tuning=[64,59,55,50,45,40],tab=[null,null,null,null,null,null];
+  tab[si]=fret;
+  return [d,tab,tuning[si]+fret,finger];
+}
+function restEvent(d=.25){return [d,['R',null,null,null,null,null],null,null]}
+
+// Longer, useful technical drills
+(function(){
+  const tuning=[64,59,55,50,45,40];
+
+  // Spider permutation 1-3-2-4 across all strings and positions 1-8
+  let ev=[];
+  for(let pos=1;pos<=8;pos++){
+    for(let si=5;si>=0;si--){
+      for(const finger of [1,3,2,4]){
+        const fret=pos+finger-1,tab=[null,null,null,null,null,null];
+        tab[si]=fret; ev.push([.125,tab,tuning[si]+fret,finger]);
+      }
+    }
+  }
+  pushExercise('spider-1324','Spider 1–3–2–4 · Lage 1–8','Basis',55,'Finger unabhängig bewegen und bei jedem Lagenwechsel entspannt bleiben.',ev);
+
+  // Spider permutation 1-4-2-3 across positions 1-8 and back
+  ev=[];
+  const positions=[1,2,3,4,5,6,7,8,7,6,5,4,3,2,1];
+  for(const pos of positions){
+    for(let si=5;si>=0;si--){
+      for(const finger of [1,4,2,3]){
+        const fret=pos+finger-1,tab=[null,null,null,null,null,null];
+        tab[si]=fret; ev.push([.125,tab,tuning[si]+fret,finger]);
+      }
+    }
+  }
+  pushExercise('spider-1423','Spider 1–4–2–3 · hoch & zurück','Mittel',50,'Große Fingerabstände kontrollieren und sauber über alle Saiten wechseln.',ev);
+
+  // String skipping
+  ev=[];
+  for(let rep=0;rep<4;rep++){
+    for(const [si,fret,finger] of [[5,5,1],[3,5,1],[4,7,3],[2,7,3],[5,8,4],[1,8,4],[4,5,1],[0,5,1]]) {
+      ev.push(singleNoteEvent(.125,si,fret,finger));
+    }
+  }
+  pushExercise('string-skip-a','String Skipping · A-Moll-Pentatonik','Mittel',65,'Übersprungene Saiten sauber treffen, ohne Nebengeräusche.',ev);
+
+  // Alternate picking 3-note groups
+  ev=[];
+  const seq=[[5,5,1],[5,7,3],[4,5,1],[4,7,3],[3,5,1],[3,7,3],[2,5,1],[2,7,3],[1,5,1],[1,8,4],[0,5,1],[0,8,4]];
+  for(let rep=0;rep<3;rep++) for(const x of seq) ev.push(singleNoteEvent(.125,...x));
+  for(const x of [...seq].reverse()) ev.push(singleNoteEvent(.125,...x));
+  pushExercise('alt-pick-long','Alternate Picking · Pentatonik-Lauf','Mittel',70,'Durchgehend Wechselschlag spielen und Saitenwechsel gleichmäßig halten.',ev);
+
+  // Rhythm eighth-note chord drill with rests
+  const Em=["0","0","0","2","2","0"], C=["0","1","0","2","3",null], G=["3","0","0","0","2","3"], D=[null,"3","2","0",null,null];
+  ev=[];
+  for(const chord of [Em,C,G,D]){
+    ev.push([.25,chord,52,null],[.125,chord,52,null],[.125,chord,52,null],[.25,["R",null,null,null,null,null],null,null],[.25,chord,52,null]);
+  }
+  pushExercise('rhythm-eighth-rests','Rhythmus · Viertel, Achtel & Pausen','Basis',72,'Puls halten, auch wenn du nicht anschlägst.',''.length?[]:ev);
+
+  // A minor pentatonic sequence 3s
+  ev=[];
+  const pent=[[5,5,1],[5,8,4],[4,5,1],[4,7,3],[3,5,1],[3,7,3],[2,5,1],[2,7,3],[1,5,1],[1,8,4],[0,5,1],[0,8,4]];
+  for(let i=0;i<pent.length-2;i++){
+    for(let k=0;k<3;k++) ev.push(singleNoteEvent(.125,...pent[i+k]));
+  }
+  pushExercise('pent-seq3','A-Moll-Pentatonik · 3er-Sequenzen','Mittel',60,'Die Skala in melodischen Dreiergruppen statt nur linear spielen.',ev);
+
+  // Legato simple
+  ev=[];
+  for(let rep=0;rep<4;rep++){
+    for(const [si,a,b,fa,fb] of [[5,5,8,1,4],[4,5,7,1,3],[3,5,7,1,3],[2,5,7,1,3],[1,5,8,1,4],[0,5,8,1,4]]){
+      ev.push(singleNoteEvent(.125,si,a,fa),singleNoteEvent(.125,si,b,fb));
+    }
+  }
+  pushExercise('legato-long','Legato · Hammer-on / Pull-off Vorbereitung','Mittel',55,'Linke Hand gleichmäßig kräftigen; Töne sollen ohne härteren Anschlag gleich laut bleiben.',ev);
+
+  // 16th-note chromatic endurance
+  ev=[];
+  for(let pos=3;pos<=9;pos++){
+    for(let si=5;si>=0;si--){
+      for(let finger=1;finger<=4;finger++) ev.push(singleNoteEvent(.0625,si,pos+finger-1,finger));
+    }
+  }
+  pushExercise('chromatic-16ths','Chromatik · 16tel-Ausdauer','Mittel',50,'16tel gleichmäßig spielen, ohne die rechte Hand zu verkrampfen.',ev);
+})();
+
+// Public-domain / traditional songs and original arrangements.
+// These are simple practice arrangements, not copied commercial tabs.
+(function(){
+  // Ode to Joy – simple melody in E minor/G major area
+  const melody=[
+    [2,0],[2,0],[2,1],[2,3],[2,3],[2,1],[2,0],[3,2],
+    [3,0],[3,0],[3,2],[2,0],[2,0],[3,2],[3,2],
+    [2,0],[2,0],[2,1],[2,3],[2,3],[2,1],[2,0],[3,2],
+    [3,0],[3,0],[3,2],[2,0],[3,2],[3,0],[3,0]
+  ];
+  let ev=[];
+  melody.forEach(([si,f],i)=>ev.push(singleNoteEvent((i===14||i===29)?.5:.25,si,f,f===0?null:Math.min(4,Math.max(1,f)))));
+  pushExercise('song-ode','Ode an die Freude · Melodie','Song · gemeinfrei',76,'Eine bekannte Melodie mit sauberem Puls und langen Phrasen spielen.',ev,'song');
+
+  // Amazing Grace – simplified melody in G
+  const ag=[
+    [3,0,.25],[2,0,.5],[2,3,.125],[2,0,.125],[2,3,.5],[1,0,.25],[1,3,.5],
+    [1,0,.25],[2,3,.5],[2,0,.25],[3,2,.5],[3,0,.25],
+    [3,0,.25],[2,0,.5],[2,3,.125],[2,0,.125],[2,3,.5],[1,0,.25],[1,3,.5],
+    [1,0,.25],[2,3,.5],[2,0,.25],[3,2,.5],[3,0,.5]
+  ];
+  ev=[];ag.forEach(([si,f,d])=>ev.push(singleNoteEvent(d,si,f,f===0?null:Math.min(4,f))));
+  pushExercise('song-amazing','Amazing Grace · einfache Melodie','Song · traditionell',64,'Phrasen atmen lassen und halbe Noten wirklich aushalten.',ev,'song');
+
+  // When the Saints – simplified melody
+  const saints=[
+    [3,0,.25],[2,0,.25],[2,3,.25],[1,0,.5],
+    [3,0,.25],[2,0,.25],[2,3,.25],[1,0,.5],
+    [3,0,.25],[2,0,.25],[2,3,.25],[1,0,.25],[2,3,.25],[2,0,.25],[3,0,.5]
+  ];
+  ev=[];saints.forEach(([si,f,d])=>ev.push(singleNoteEvent(d,si,f,f===0?null:Math.min(4,f))));
+  pushExercise('song-saints','When the Saints · Melodie','Song · traditionell',84,'Kurze melodische Motive wiederholen und rhythmisch stabil spielen.',ev,'song');
+
+  // Original 12-bar blues practice song
+  ev=[];
+  const riffA=[[4,0,0,null],[4,2,2,2],[3,0,0,null],[3,2,2,2]];
+  const riffD=[[3,0,0,null],[3,2,2,2],[2,0,0,null],[2,2,2,2]];
+  for(const root of ['A','A','A','A','D','D','A','A','D','D','A','A']){
+    const riff=root==='A'?riffA:riffD;
+    for(const [si,f,_,finger] of riff) ev.push(singleNoteEvent(.25,si,f,finger));
+  }
+  pushExercise('song-12bar','12-Bar Blues · Practice Song','Song · Original',80,'Eine vollständige 12-Takt-Form spielen und die Harmonie im Ablauf hören.',ev,'song');
+
+  // Original pop practice progression as arpeggios
+  ev=[];
+  const arp=[
+    [[4,3,3],[3,2,2],[2,0,null],[1,1,1]], // C
+    [[5,3,3],[4,2,2],[3,0,null],[2,0,null]], // G
+    [[4,0,null],[3,2,2],[2,2,2],[1,1,1]], // Am
+    [[3,0,null],[2,2,2],[1,3,3],[0,2,2]], // D-ish
+  ];
+  for(let rep=0;rep<2;rep++) for(const chord of arp) for(let r=0;r<2;r++) for(const [si,f,fi] of chord) ev.push(singleNoteEvent(.125,si,f,fi));
+  pushExercise('song-pop-original','Open Chords · Practice Song','Song · Original',72,'Akkordtöne als durchgehende Begleitung spielen und Formgefühl entwickeln.',ev,'song');
+})();
+
+
+// Curated base-library normalization: keep the best existing material, add structured drills, then cap at 40 + 10.
+(function(){
+  function addEx(id,title,level,bpm,goal,events,type='exercise'){EX.push({id,title,level,bpm,goal,events,type});}
+  function evt(d,si,fret,finger=null){const tuning=[64,59,55,50,45,40],tab=[null,null,null,null,null,null];tab[si]=fret;return [d,tab,tuning[si]+Number(fret),finger];}
+  function rest(d=.25){return [d,['R',null,null,null,null,null],null,null];}
+
+  const drills=[];
+
+  // 1) Spider families over longer ranges
+  const perms=[[1,2,3,4],[1,3,2,4],[1,4,2,3],[2,1,4,3],[4,3,2,1],[1,2,4,3]];
+  perms.forEach((perm,pi)=>{
+    let ev=[]; const positions=pi<3?[1,2,3,4,5,6,7,8]:[1,2,3,4,5,6,5,4,3,2,1];
+    for(const pos of positions)for(let si=5;si>=0;si--)for(const f of perm)ev.push(evt(.125,si,pos+f-1,f));
+    drills.push({id:`cur-spider-${pi}`,title:`Spider ${perm.join('–')} · langer Lauf`,level:pi<2?'Basis':'Mittel',bpm:50+pi*3,goal:'Finger unabhängig und ohne unnötige Spannung über mehrere Lagen bewegen.',events:ev});
+  });
+
+  // 2) String crossing / skipping
+  const skipPatterns=[
+    [[5,5,1],[4,7,3],[3,5,1],[2,7,3],[1,5,1],[0,8,4]],
+    [[5,5,1],[3,5,1],[4,7,3],[2,7,3],[1,8,4],[0,5,1]],
+    [[5,8,4],[2,5,1],[4,5,1],[1,8,4],[3,7,3],[0,5,1]]
+  ];
+  skipPatterns.forEach((pat,i)=>{
+    let ev=[];for(let r=0;r<6;r++)for(const x of pat)ev.push(evt(.125,...x));
+    drills.push({id:`cur-skip-${i}`,title:`String Skipping ${i+1}`,level:'Mittel',bpm:60+i*5,goal:'Saitensprünge sauber treffen und Nebengeräusche vermeiden.',events:ev});
+  });
+
+  // 3) Alternate picking / sequences
+  const pent=[[5,5,1],[5,8,4],[4,5,1],[4,7,3],[3,5,1],[3,7,3],[2,5,1],[2,7,3],[1,5,1],[1,8,4],[0,5,1],[0,8,4]];
+  for(let v=0;v<4;v++){
+    let ev=[];
+    if(v===0){for(let r=0;r<3;r++)for(const x of pent)ev.push(evt(.125,...x));for(const x of [...pent].reverse())ev.push(evt(.125,...x))}
+    if(v===1){for(let i=0;i<pent.length-2;i++)for(let k=0;k<3;k++)ev.push(evt(.125,...pent[i+k]))}
+    if(v===2){for(let i=0;i<pent.length-3;i++)for(const k of [0,2,1,3])ev.push(evt(.125,...pent[i+k]))}
+    if(v===3){for(let r=0;r<5;r++)for(const x of pent.slice(0,6))ev.push(evt(.0625,...x))}
+    drills.push({id:`cur-alt-${v}`,title:['Alternate Picking · kompletter Pentatoniklauf','Pentatonik · 3er-Sequenzen','Pentatonik · 1-3-2-4 Sequenz','Alternate Picking · 16tel-Ausdauer'][v],level:v<2?'Mittel':'Fortgeschritten',bpm:[70,60,55,50][v],goal:'Wechselschlag mit musikalischen Sequenzen und sauberem Puls verbinden.',events:ev});
+  }
+
+  // 4) Rhythm drills
+  const Em=["0","0","0","2","2","0"],C=["0","1","0","2","3",null],G=["3","0","0","0","2","3"],D=[null,"3","2","0",null,null],Am=["0","1","2","2","0",null];
+  const rhythmPats=[
+    [.25,.25,.25,.25],
+    [.125,.125,.25,.125,.125,.25],
+    [.25,.125,.125,.25,.25],
+    [.125,.125,.125,.125,.25,.25]
+  ];
+  rhythmPats.forEach((pat,i)=>{
+    let ev=[];for(const chord of [Em,C,G,D])for(let r=0;r<2;r++)for(const d of pat)ev.push([d,chord,52,null]);
+    drills.push({id:`cur-rhythm-${i}`,title:['Akkordrhythmus · Viertel','Akkordrhythmus · Achtel','Akkordrhythmus · Synkopen-Basis','Akkordrhythmus · 8-Takt-Pattern'][i],level:i<2?'Basis':'Mittel',bpm:[70,72,68,76][i],goal:'Akkordwechsel und rechte Hand in einem stabilen Groove verbinden.',events:ev});
+  });
+
+  // 5) Arpeggio / picking
+  const arpShapes=[
+    [[4,0,null],[3,2,2],[2,2,2],[1,1,1],[0,0,null]], // Am
+    [[5,0,null],[4,2,2],[3,2,3],[2,1,1],[1,0,null],[0,0,null]], // E
+    [[4,3,3],[3,2,2],[2,0,null],[1,1,1],[0,0,null]], // C
+    [[5,3,3],[4,2,2],[3,0,null],[2,0,null],[1,0,null],[0,3,4]] // G
+  ];
+  arpShapes.forEach((shape,i)=>{
+    let ev=[];for(let r=0;r<5;r++){for(const x of shape)ev.push(evt(.125,...x));for(const x of [...shape].reverse().slice(1,-1))ev.push(evt(.125,...x));}
+    drills.push({id:`cur-arp-${i}`,title:`Arpeggio · ${['Am','E','C','G'][i]}`,level:'Basis',bpm:60+i*3,goal:'Akkordtöne einzeln spielen und trotzdem eine zusammenhängende Harmonie hören.',events:ev});
+  });
+
+  // 6) Blues phrasing
+  const bluesPhrases=[
+    [[3,5,1,.125],[3,7,3,.125],[2,5,1,.25],['R',0,0,.25],[2,7,3,.25],[1,5,1,.25]],
+    [[2,5,1,.125],[2,7,3,.125],[1,5,1,.125],[1,8,4,.125],[0,5,1,.25],['R',0,0,.25]],
+    [[1,8,4,.25],[1,5,1,.125],[2,7,3,.125],[2,5,1,.25],[3,7,3,.25]]
+  ];
+  bluesPhrases.forEach((p,i)=>{
+    let ev=[];for(let r=0;r<6;r++)for(const x of p){if(x[0]==='R')ev.push(rest(x[3]));else ev.push(evt(x[3],x[0],x[1],x[2]));}
+    drills.push({id:`cur-blues-${i}`,title:`Blues Phrase ${i+1} · Frage & Antwort`,level:'Mittel',bpm:68+i*4,goal:'Phrasen, Pausen und Zielnoten musikalisch gestalten.',events:ev});
+  });
+
+  // 7) Legato / endurance
+  for(let i=0;i<4;i++){
+    let ev=[];const pairs=i%2===0?[[5,5,8,1,4],[4,5,7,1,3],[3,5,7,1,3],[2,5,7,1,3],[1,5,8,1,4],[0,5,8,1,4]]:[[5,5,7,1,3],[4,5,8,1,4],[3,5,7,1,3],[2,5,8,1,4],[1,5,7,1,3],[0,5,8,1,4]];
+    for(let r=0;r<5;r++)for(const [si,a,b,fa,fb] of pairs){ev.push(evt(.125,si,a,fa),evt(.125,si,b,fb))}
+    drills.push({id:`cur-legato-${i}`,title:`Legato Drill ${i+1}`,level:i<2?'Mittel':'Fortgeschritten',bpm:52+i*4,goal:'Linke Hand kontrollieren und gleichmäßigen Ton ohne harte Anschläge erzeugen.',events:ev});
+  }
+
+  // 8) Scale position + sequence drills
+  const majorC=[[4,3,3],[3,0,null],[3,2,2],[3,3,3],[2,0,null],[2,2,2],[1,0,null],[1,1,1],[1,3,3],[0,0,null],[0,1,1],[0,3,3]];
+  for(let i=0;i<4;i++){
+    let ev=[];
+    if(i===0){for(let r=0;r<3;r++)for(const x of majorC)ev.push(evt(.125,...x))}
+    if(i===1){for(let n=0;n<majorC.length-2;n++)for(let k=0;k<3;k++)ev.push(evt(.125,...majorC[n+k]))}
+    if(i===2){for(let n=0;n<majorC.length-3;n++)for(const k of [0,2,1,3])ev.push(evt(.125,...majorC[n+k]))}
+    if(i===3){for(let r=0;r<2;r++){for(const x of majorC)ev.push(evt(.25,...x));for(const x of [...majorC].reverse())ev.push(evt(.25,...x))}}
+    drills.push({id:`cur-scale-${i}`,title:['C-Dur · kompletter Lauf','C-Dur · 3er-Sequenzen','C-Dur · 1-3-2-4','C-Dur · Viertel phrasiert'][i],level:i<1?'Basis':'Mittel',bpm:[66,58,54,72][i],goal:'Tonleiter als musikalisches Material und nicht nur als Muster spielen.',events:ev});
+  }
+
+  // Add drills if unique
+  const ids=new Set(EX.map(x=>x.id));
+  drills.forEach(x=>{if(!ids.has(x.id)){x.type='exercise';EX.push(x);ids.add(x.id)}});
+
+  // Songs: keep existing public-domain/originals, add more public-domain/traditional/original arrangements
+  const songs=[];
+  function song(id,title,bpm,goal,seq){let ev=[];seq.forEach(([si,f,d,fi])=>ev.push(si==='R'?rest(d):evt(d,si,f,fi)));songs.push({id,title,level:'Song · gemeinfrei/original',bpm,goal,events:ev,type:'song'})}
+  song('song-frere','Frère Jacques · Melodie',80,'Eine einfache Form mit Wiederholung und klarer Phrasierung spielen.',[
+    [3,0,.25,null],[3,2,.25,2],[2,0,.25,null],[3,0,.25,null],[3,0,.25,null],[3,2,.25,2],[2,0,.25,null],[3,0,.25,null],
+    [2,0,.25,null],[2,2,.25,2],[1,0,.5,null],[2,0,.25,null],[2,2,.25,2],[1,0,.5,null]
+  ]);
+  song('song-twinkle','Twinkle Twinkle · Melodie',72,'Melodie über Wiederholungen und längere Notenwerte gestalten.',[
+    [3,0,.25,null],[3,0,.25,null],[2,0,.25,null],[2,0,.25,null],[1,0,.25,null],[1,0,.25,null],[2,0,.5,null],
+    [3,2,.25,2],[3,2,.25,2],[3,0,.25,null],[3,0,.25,null],[2,2,.25,2],[2,2,.25,2],[2,0,.5,null]
+  ]);
+  song('song-mary','Mary Had a Little Lamb · Melodie',84,'Kurze Motive wiedererkennen und rhythmisch stabil wiederholen.',[
+    [2,0,.25,null],[3,2,.25,2],[3,0,.25,null],[3,2,.25,2],[2,0,.25,null],[2,0,.25,null],[2,0,.5,null],
+    [3,2,.25,2],[3,2,.25,2],[3,2,.5,2],[2,0,.25,null],[1,0,.25,null],[1,0,.5,null]
+  ]);
+  song('song-house-original','Open Chord Song · 16 Takte',74,'Akkordform, Phrasenlänge und Begleitgefühl über 16 Takte halten.',[
+    [4,0,.125,null],[3,2,.125,2],[2,2,.125,2],[1,1,.125,1],[0,0,.25,null],[1,1,.25,1],
+    [5,3,.125,3],[4,2,.125,2],[3,0,.125,null],[2,0,.125,null],[1,0,.25,null],[0,3,.25,4]
+  ].flatMap(x=>Array(8).fill(x)));
+  song('song-blues-original-2','Minor Blues · 12 Takte',78,'Eine komplette Bluesform mit Pausen und wiederkehrendem Motiv spielen.',[
+    [4,0,.25,null],[4,2,.25,2],[3,0,.25,null],[3,2,.25,2],[3,0,.25,null],[3,2,.25,2],
+    [4,0,.25,null],['R',0,.25,null]
+  ].flatMap(x=>Array(6).fill(x)));
+
+  songs.forEach(x=>{if(!ids.has(x.id)){EX.push(x);ids.add(x.id)}});
+
+  // Normalize exact counts: 40 exercises, 10 songs.
+  const exercisePool=EX.filter(x=>(x.type||'exercise')==='exercise');
+  const songPool=EX.filter(x=>(x.type||'exercise')==='song');
+  const keepEx=exercisePool.slice(0,40);
+  const keepSongs=songPool.slice(0,10);
+  EX.splice(0,EX.length,...keepEx,...keepSongs);
+})();
+
+
+// ---- AUDITED MUSICAL CONTENT v2 ---------------------------------------------
+// Single-source rule: TAB is authoritative for technical drills; pitch is derived
+// directly from string+fret. Original songs are defined as pitch+rhythm and TAB is
+// generated from those pitches. No remembered/commercial song transcriptions.
+const STD_TUNING=[64,59,55,50,45,40]; // e B G D A E
+const ALLOWED_DURATIONS=new Set([.0625,.125,.25,.5,1]);
+
+function pitchFromSingleTab(tab){
+  let found=null;
+  for(let si=0;si<6;si++){
+    const v=tab?.[si];
+    if(v===null||v===undefined||v==='R'||v==='x')continue;
+    const fret=Number(v);
+    if(Number.isFinite(fret)){
+      if(found!==null)return null;
+      found=STD_TUNING[si]+fret;
+    }
+  }
+  return found;
+}
+function tabEvent(duration,si,fret,finger=null){
+  const tab=[null,null,null,null,null,null]; tab[si]=fret;
+  return [duration,tab,STD_TUNING[si]+fret,finger];
+}
+function restEvent(duration=.25){return [duration,['R',null,null,null,null,null],null,null]}
+function chooseTabForPitch(midi,prev=null){
+  const candidates=[];
+  for(let si=0;si<6;si++){
+    const fret=midi-STD_TUNING[si];
+    if(fret>=0&&fret<=17){
+      let score=fret*.5+si*.12;
+      if(prev)score+=Math.abs(fret-prev.fret)*.55+Math.abs(si-prev.si)*1.1;
+      if(fret<=5)score-=1.7;
+      candidates.push({si,fret,score});
+    }
+  }
+  candidates.sort((x,y)=>x.score-y.score);
+  return candidates[0]||null;
+}
+function songEvents(items){
+  const prev={value:null};
+  return items.map(([d,m])=>{
+    if(m===null)return restEvent(d);
+    const p=chooseTabForPitch(m,prev.value); if(!p)throw new Error('Unspielbarer Songton '+m);
+    prev.value=p;
+    const finger=p.fret===0?null:(p.fret<=4?p.fret:(p.fret>=5&&p.fret<=8?p.fret-4:null));
+    return tabEvent(d,p.si,p.fret,finger);
+  });
+}
+function addExercise(arr,id,title,level,bpm,goal,events,kind='mechanical',pcs=null){arr.push({id,title,level,bpm,goal,events,type:'exercise',auditKind:kind,allowedPitchClasses:pcs})}
+function addSong(arr,id,title,bpm,goal,items,pcs){arr.push({id,title,level:'Song · PLAY. Original',bpm,goal,events:songEvents(items),type:'song',source:'PLAY. Original',auditKind:'song',allowedPitchClasses:pcs})}
+
+const AUDITED_EX=[];
+// 8 Spider/permutation drills: mechanically exact, explicit fingers.
+const SPIDER_PERMS=[[1,2,3,4],[1,3,2,4],[1,4,2,3],[2,1,3,4],[2,4,1,3],[3,1,4,2],[4,3,2,1],[4,2,3,1]];
+SPIDER_PERMS.forEach((perm,pi)=>{
+  const ev=[],positions=pi<4?[1,2,3,4,5,6,7,8,9,10,11,12]:[1,2,3,4,5,6,7,8,7,6,5,4,3,2,1];
+  for(const pos of positions)for(let si=5;si>=0;si--)for(const finger of perm)ev.push(tabEvent(.125,si,pos+finger-1,finger));
+  addExercise(AUDITED_EX,'a-spider-'+(pi+1),'Spider '+perm.join('–')+(pi<4?' · Lage 1–12':' · hoch & zurück'),pi<2?'Basis':'Mittel',48+pi*3,'Finger unabhängig, gleichmäßig und ohne unnötige Spannung bewegen.',ev,'mechanical');
+});
+
+// 4 chromatic control drills at fixed positions.
+for(const [idx,pos] of [[1,3],[2,5],[3,7],[4,9]]){
+  const ev=[];
+  for(let cycle=0;cycle<4;cycle++){
+    for(let si=5;si>=0;si--)for(let finger=1;finger<=4;finger++)ev.push(tabEvent(.125,si,pos+finger-1,finger));
+    for(let si=0;si<6;si++)for(let finger=4;finger>=1;finger--)ev.push(tabEvent(.125,si,pos+finger-1,finger));
+  }
+  addExercise(AUDITED_EX,'a-chromatic-'+idx,'Chromatik · Lage '+pos,'Basis',52+idx*3,'1–2–3–4 vorwärts und rückwärts auf allen Saiten sauber kontrollieren.',ev,'mechanical');
+}
+
+// 6 alternate-picking drills in A minor pentatonic box 1.
+const A_MIN_PENT=[[5,5,1],[5,8,4],[4,5,1],[4,7,3],[3,5,1],[3,7,3],[2,5,1],[2,7,3],[1,5,1],[1,8,4],[0,5,1],[0,8,4]];
+const A_PCS=[9,0,2,4,7];
+for(let v=0;v<6;v++){
+  const ev=[];
+  if(v===0){for(let r=0;r<4;r++)for(const x of A_MIN_PENT)ev.push(tabEvent(.125,...x));}
+  if(v===1){for(let r=0;r<3;r++)for(const x of [...A_MIN_PENT].reverse())ev.push(tabEvent(.125,...x));}
+  if(v===2){for(let i=0;i<A_MIN_PENT.length-2;i++)for(let k=0;k<3;k++)ev.push(tabEvent(.125,...A_MIN_PENT[i+k]));}
+  if(v===3){for(let i=0;i<A_MIN_PENT.length-3;i++)for(const k of [0,2,1,3])ev.push(tabEvent(.125,...A_MIN_PENT[i+k]));}
+  if(v===4){for(let r=0;r<6;r++)for(const x of A_MIN_PENT.slice(0,6))ev.push(tabEvent(.0625,...x));}
+  if(v===5){for(let r=0;r<4;r++){for(const x of A_MIN_PENT)ev.push(tabEvent(.125,...x));for(const x of [...A_MIN_PENT].reverse().slice(1,-1))ev.push(tabEvent(.125,...x));}}
+  addExercise(AUDITED_EX,'a-pick-'+(v+1),['Alternate Picking · aufwärts','Alternate Picking · abwärts','Pentatonik · 3er-Gruppen','Pentatonik · 1-3-2-4','Alternate Picking · 16tel','Pentatonik · kompletter Rundlauf'][v],v<2?'Basis':'Mittel',[62,62,56,52,48,60][v],'Wechselschlag gleichmäßig halten und Saitenwechsel sauber in den Puls setzen.',ev,'scale',A_PCS);
+}
+
+// 6 scalar drills: C major and G major, each linear / thirds / 3-note groups.
+const C_MAJOR=[[4,3,3],[3,0,null],[3,2,2],[3,3,3],[2,0,null],[2,2,2],[1,0,null],[1,1,1],[1,3,3],[0,0,null],[0,1,1],[0,3,3]];
+const G_MAJOR=[[5,3,3],[4,0,null],[4,2,2],[4,3,3],[3,0,null],[3,2,2],[2,0,null],[2,2,2],[1,0,null],[1,1,1],[1,3,3],[0,0,null],[0,2,2],[0,3,3]];
+for(const [name,shape,pcs,baseid] of [['C-Dur',C_MAJOR,[0,2,4,5,7,9,11],'c'],['G-Dur',G_MAJOR,[0,2,4,6,7,9,11],'g']]){
+  for(let mode=0;mode<3;mode++){
+    const ev=[];
+    if(mode===0){for(let r=0;r<3;r++)for(const x of shape)ev.push(tabEvent(.125,...x));for(const x of [...shape].reverse())ev.push(tabEvent(.125,...x));}
+    if(mode===1){for(let i=0;i<shape.length-2;i++)for(let k=0;k<3;k++)ev.push(tabEvent(.125,...shape[i+k]));}
+    if(mode===2){for(let i=0;i<shape.length-2;i++)for(const k of [0,2,1])ev.push(tabEvent(.125,...shape[i+k]));}
+    addExercise(AUDITED_EX,'a-scale-'+baseid+'-'+mode,name+' · '+['kompletter Lauf','3er-Sequenzen','Terzbewegung'][mode],mode===0?'Basis':'Mittel',[66,58,56][mode],'Tonleiter als Tonmaterial hören und rhythmisch kontrolliert über mehrere Saiten spielen.',ev,'scale',pcs);
+  }
+}
+
+// 5 string-skipping drills using only A minor pentatonic notes.
+const SKIPS=[
+ [[5,5,1],[3,5,1],[4,7,3],[2,7,3],[1,8,4],[0,5,1]],
+ [[5,8,4],[2,5,1],[4,5,1],[1,8,4],[3,7,3],[0,5,1]],
+ [[4,5,1],[2,5,1],[3,7,3],[1,8,4],[2,7,3],[0,8,4]],
+ [[5,5,1],[2,7,3],[4,7,3],[1,5,1],[3,5,1],[0,8,4]],
+ [[5,8,4],[3,7,3],[1,5,1],[4,5,1],[2,7,3],[0,5,1]]
+];
+SKIPS.forEach((pat,i)=>{const ev=[];for(let r=0;r<8;r++)for(const x of pat)ev.push(tabEvent(.125,...x));addExercise(AUDITED_EX,'a-skip-'+(i+1),'String Skipping · Pattern '+(i+1),'Mittel',55+i*3,'Übersprungene Saiten präzise treffen und ungewollte Nebengeräusche vermeiden.',ev,'scale',A_PCS)});
+
+// 4 arpeggio drills, all chord-tone validated.
+const ARPS=[
+ ['Am',[[4,0,null],[3,2,2],[2,2,2],[1,1,1],[0,0,null]],[0,4,9]],
+ ['C', [[4,3,3],[3,2,2],[2,0,null],[1,1,1],[0,0,null]],[0,4,7]],
+ ['Em',[[5,0,null],[4,2,2],[3,2,3],[2,0,null],[1,0,null],[0,0,null]],[4,7,11]],
+ ['G', [[5,3,3],[4,2,2],[3,0,null],[2,0,null],[1,0,null],[0,3,4]],[2,7,11]]
+];
+ARPS.forEach(([name,shape,pcs],i)=>{const ev=[];for(let r=0;r<6;r++){for(const x of shape)ev.push(tabEvent(.125,...x));for(const x of [...shape].reverse().slice(1,-1))ev.push(tabEvent(.125,...x));}addExercise(AUDITED_EX,'a-arp-'+name.toLowerCase(),'Arpeggio · '+name,'Basis',58+i*3,'Akkordtöne nacheinander spielen und als einen zusammengehörigen Klang hören.',ev,'chordtones',pcs)});
+
+// 3 rhythm-reading drills on a single pitch: mathematically clean note values.
+const RHYTHMS=[
+ [.25,.25,.25,.25,.25,.25,.25,.25],
+ [.125,.125,.25,.125,.125,.25,.125,.125,.125,.125,.25,.25],
+ [.0625,.0625,.0625,.0625,.25,.125,.125,.25,.5]
+];
+RHYTHMS.forEach((pat,i)=>{const ev=[];for(let r=0;r<6;r++)for(const d of pat)ev.push(tabEvent(d,3,2,2));addExercise(AUDITED_EX,'a-rhythm-'+(i+1),['Rhythmus · Viertel','Rhythmus · Achtelgruppen','Rhythmus · 16tel-Mix'][i],i===0?'Basis':'Mittel',[70,64,52][i],'Notenwerte exakt lesen und dieselbe Tonhöhe nur über Rhythmus musikalisch gestalten.',ev,'rhythm',[4])});
+
+// 2 position-shift drills + 2 longer phrasing drills = total 40.
+for(let k=0;k<2;k++){
+ const ev=[];for(let pos=3;pos<=10;pos++){for(let si=5;si>=0;si--){ev.push(tabEvent(.125,si,pos,1),tabEvent(.125,si,pos+2,3));}}
+ addExercise(AUDITED_EX,'a-shift-'+(k+1),'Positionswechsel · '+(k===0?'3–10':'kontrollierter Rückweg'),'Mittel',54+k*4,'Lagenwechsel hörbar sauber ausführen und die Hand als Einheit verschieben.',k===0?ev:[...ev].reverse(),'mechanical');
+}
+for(let k=0;k<2;k++){
+ const ev=[];const phrase=k===0?[[4,5,1,.125],[3,5,1,.125],[3,7,3,.25],[2,5,1,.25],['R',0,0,.25],[2,7,3,.125],[1,5,1,.125],[1,8,4,.5]]:[[3,5,1,.25],[3,7,3,.125],[2,5,1,.125],['R',0,0,.25],[1,5,1,.25],[2,7,3,.125],[2,5,1,.125],[4,5,1,.5]];
+ for(let r=0;r<8;r++)for(const x of phrase){if(x[0]==='R')ev.push(restEvent(x[3]));else ev.push(tabEvent(x[3],x[0],x[1],x[2]));}
+ addExercise(AUDITED_EX,'a-phrase-'+(k+1),'A-Moll · Phrase '+(k+1),'Mittel',68+k*4,'Pausen, Zielton und Wiederholung als musikalische Form bewusst spielen.',ev,'scale',A_PCS);
+}
+
+// 10 original songs/etudes. Pitch sequences are source of truth; TAB is generated.
+const C4=60,D4=62,E4=64,F4=65,Fs4=66,G4=67,A4=69,B4=71,C5=72,D5=74,E5=76,F5=77,Fs5=78,G5=79,A5=81;
+const AUDITED_SONGS=[];
+function addOriginal(id,title,bpm,goal,items,pcs){addSong(AUDITED_SONGS,id,title,bpm,goal,items,pcs)}
+addOriginal('o1','A-Moll · Call & Response',72,'Zwei 4-Takt-Phrasen als Frage und Antwort spielen.',[[.125,A4],[.125,C5],[.25,D5],[.25,E5],[.25,null],[.125,E5],[.125,D5],[.25,C5],[.5,A4],[.25,null],[.25,C5],[.25,D5],[.25,E5],[.5,A5],[.25,G5],[.25,E5],[.5,A4]],[9,0,2,4,7]);
+addOriginal('o2','C-Dur · Melodic Etude',76,'Eine 8-Takt-Melodie mit klaren Phrasenenden und C als Ruhepunkt spielen.',[[.25,E4],[.125,F4],[.125,G4],[.25,A4],[.25,G4],[.25,E4],[.25,D4],[.5,C4],[.25,G4],[.25,A4],[.25,B4],[.25,C5],[.25,B4],[.25,G4],[.5,E4],[.25,F4],[.25,E4],[.25,D4],[.25,C4],[.5,C4]],[0,2,4,5,7,9,11]);
+addOriginal('o3','E-Moll · Eighth-note Etude',80,'Achtelbewegung mit E als Grundton über mehrere Phrasen stabil halten.',[[.125,E4],[.125,G4],[.125,A4],[.125,B4],[.25,G4],[.25,E4],[.125,D4],[.125,E4],[.25,G4],[.5,E4],[.125,B4],[.125,A4],[.125,G4],[.125,E4],[.25,D4],[.25,E4],[.5,E4]],[2,4,6,7,9,11]);
+addOriginal('o4','G-Dur · Phrase Study',74,'Motivwiederholung und G-Dur-Klang über eine längere Form hören.',[[.25,G4],[.125,A4],[.125,B4],[.25,D5],[.25,B4],[.25,A4],[.25,G4],[.5,D4],[.25,B4],[.25,C5],[.25,D5],[.25,G5],[.5,D5],[.5,G4]],[0,2,4,6,7,9,11]);
+addOriginal('o5','A-Moll · Arpeggio Song',68,'A–C–E als harmonische Grundlage einer kleinen Melodie hören.',[[.25,A4],[.25,C5],[.25,E5],[.25,C5],[.25,A4],[.25,E4],[.5,A4],[.25,C5],[.25,E5],[.25,A5],[.25,E5],[.25,C5],[.5,A4]],[0,4,9]);
+addOriginal('o6','C-Dur · Quarter & Eighth Song',78,'Viertel und Achtel in einer melodischen Form unterscheiden.',[[.25,C4],[.125,D4],[.125,E4],[.25,G4],[.25,E4],[.125,F4],[.125,G4],[.25,A4],[.25,G4],[.25,E4],[.25,D4],[.5,C4]],[0,2,4,5,7,9,11]);
+addOriginal('o7','E-Moll · Space & Phrase',70,'Pausen als Teil der Musik hören und nicht mit zusätzlichen Noten füllen.',[[.25,E4],[.25,G4],[.25,null],[.25,A4],[.125,B4],[.125,A4],[.25,G4],[.5,E4],[.25,null],[.25,D4],[.25,E4],[.5,G4],[.5,E4]],[2,4,6,7,9,11]);
+addOriginal('o8','G-Dur · Long-Line Etude',72,'Eine längere melodische Linie ohne Tempodrift über mehrere Takte halten.',[[.125,G4],[.125,A4],[.125,B4],[.125,C5],[.25,D5],[.25,B4],[.125,A4],[.125,G4],[.25,D4],[.25,G4],[.125,B4],[.125,C5],[.25,D5],[.25,G5],[.5,D5],[.5,G4]],[0,2,4,6,7,9,11]);
+addOriginal('o9','A-Moll · 16th-note Miniature',56,'Kurze Sechzehntelgruppen exakt im Puls halten und auf A auflösen.',[[.0625,A4],[.0625,C5],[.0625,D5],[.0625,E5],[.25,C5],[.25,A4],[.0625,E5],[.0625,D5],[.0625,C5],[.0625,A4],[.5,A4]],[9,0,2,4,7]);
+addOriginal('o10','C-Dur · Final Practice Song',80,'Rhythmuswerte, Phrasierung und Tonart in einer längeren Abschluss-Etüde verbinden.',[[.25,C4],[.125,E4],[.125,G4],[.25,A4],[.25,G4],[.25,E4],[.25,D4],[.5,C4],[.125,E4],[.125,F4],[.25,G4],[.25,C5],[.25,B4],[.25,A4],[.25,G4],[.5,E4],[.25,D4],[.25,E4],[.25,F4],[.25,G4],[.5,C5],[.5,C4]],[0,2,4,5,7,9,11]);
+
+// Expand original song motifs to real practice length by repeating form exactly.
+for(const s of AUDITED_SONGS){const base=s.events.slice();s.events=[];for(let r=0;r<4;r++)s.events.push(...base.map(ev=>[ev[0],[...ev[1]],ev[2],ev[3]]));}
+
+// Hard musical audit.
+function auditLibrary(){
+ const errors=[];
+ if(AUDITED_EX.length!==40)errors.push('exercise-count='+AUDITED_EX.length);
+ if(AUDITED_SONGS.length!==10)errors.push('song-count='+AUDITED_SONGS.length);
+ for(const item of [...AUDITED_EX,...AUDITED_SONGS]){
+   if(!item.events?.length)errors.push(item.id+':empty');
+   item.events?.forEach((ev,i)=>{
+     const [dur,tab,midi,finger]=ev;
+     if(!ALLOWED_DURATIONS.has(dur))errors.push(`${item.id}:${i}:duration=${dur}`);
+     const p=pitchFromSingleTab(tab);
+     const isRest=tab?.[0]==='R';
+     if(isRest){if(midi!==null)errors.push(`${item.id}:${i}:rest-midi`);return;}
+     if(p===null)errors.push(`${item.id}:${i}:not-single-note`);
+     else if(p!==midi)errors.push(`${item.id}:${i}:tab=${p},midi=${midi}`);
+     for(const v of tab||[]){if(v!==null&&v!=='R'&&(Number(v)<0||Number(v)>17))errors.push(`${item.id}:${i}:fret=${v}`)}
+     if(finger!==null&&(!Number.isInteger(finger)||finger<1||finger>4))errors.push(`${item.id}:${i}:finger=${finger}`);
+     if(item.allowedPitchClasses&&midi!==null&&!item.allowedPitchClasses.includes(((midi%12)+12)%12))errors.push(`${item.id}:${i}:pitchclass=${midi%12}`);
+   });
+ }
+ if(errors.length)throw new Error('Musical audit failed: '+errors.slice(0,12).join('; '));
+ return {exercises:AUDITED_EX.length,songs:AUDITED_SONGS.length,events:[...AUDITED_EX,...AUDITED_SONGS].reduce((n,x)=>n+x.events.length,0),errors:0};
+}
+const AUDIT=auditLibrary();
+EX.splice(0,EX.length,...AUDITED_EX,...AUDITED_SONGS);
+window.__PLAY_AUDIT__=AUDIT;
+let current=0,currentLibrary='exercise',ctx=null,run=null,raf=0,nodes=[];
+const list=document.getElementById('exerciseList'),score=document.getElementById('score'),bpmSel=document.getElementById('bpm'),countSel=document.getElementById('count'),guideSel=document.getElementById('guide'),fingeringSel=document.getElementById('fingering'),statusEl=document.getElementById('status'),clockEl=document.getElementById('clock'),scroller=document.getElementById('scroller'),beats=[...document.querySelectorAll('#metro i')];
+const stringY=[272,306,340,374,408,442], staffY=[62,76,90,104,118];
+const stringMidi=[64,59,55,50,45,40]; // e B G D A E
+function audio(){if(!ctx)ctx=new (window.AudioContext||window.webkitAudioContext)();return ctx}
+function freq(m){return 440*Math.pow(2,(m-69)/12)}
+function playTone(m,t,d){if(m==null)return;const c=audio(),o=c.createOscillator(),g=c.createGain();o.type='triangle';o.frequency.value=freq(m);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.08,t+.006);g.gain.exponentialRampToValueAtTime(.0001,t+Math.max(.05,d*.88));o.connect(g).connect(c.destination);o.start(t);o.stop(t+d);nodes.push(o,g)}
+function click(t,accent){const c=audio(),o=c.createOscillator(),g=c.createGain();o.frequency.value=accent?1300:820;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(accent?.12:.07,t+.002);g.gain.exponentialRampToValueAtTime(.0001,t+.04);o.connect(g).connect(c.destination);o.start(t);o.stop(t+.05);nodes.push(o,g)}
+function stopAll(){if(run)run.alive=false;run=null;cancelAnimationFrame(raf);raf=0;nodes.forEach(n=>{try{n.stop?.()}catch{}try{n.disconnect?.()}catch{}});nodes=[];beats.forEach(x=>x.classList.remove('on'));statusEl.textContent='Gestoppt';document.getElementById('play').textContent='▶ PLAY ALONG';scroller.scrollLeft=0}
+function musicText(ex){if((ex.type||'exercise')==='song')return 'Spiele nicht nur einzelne Töne: höre Form, Wiederholung, Phrasenende und die Stellen, an denen die Melodie Spannung oder Ruhe erzeugt.';if(ex.id==='ex4')return 'Du lernst Begleitung: Akkorde auf Zählzeit 1 wechseln und den Puls durchlaufen lassen.';if(ex.id==='ex5')return 'Blues funktioniert durch Frage, Antwort und Raum. Die Pause ist hier genauso wichtig wie die Note.';if(ex.id==='ex6')return 'Ein Arpeggio zeigt dir die Töne eines Akkords nacheinander. Höre, dass sie zusammen eine Harmonie bilden.';if(ex.id==='ex1')return 'Die A-Moll-Pentatonik wird zu Musik, wenn du nicht nur das Muster spielst, sondern Phrasen bildest und auf A landest.';return 'Timing und Klang sind wichtiger als Geschwindigkeit. Jede Note soll klar im Puls sitzen.'}
+
+function fingerForEvent(ex,ev,index){
+  // Explicit per-event finger wins if added later.
+  if(ev[3]!=null)return ev[3];
+  const tab=ev[1];
+  // Chords/arpeggios: hide generic fingering unless explicitly supplied.
+  if(ex.id==='ex4'||ex.id==='ex6')return null;
+  // Chromatic spider: 5-6-7-8 => 1-2-3-4
+  if(ex.id==='ex2'){
+    for(const v of tab){ if(v!==null && v!=='R'){ const f=Number(v); if(f>=5&&f<=8)return f-4; } }
+  }
+  // Pentatonic / blues / picking: use position-based practical fingers.
+  for(const v of tab){
+    if(v!==null && v!=='R'){
+      const f=Number(v);
+      if(f===5)return 1;
+      if(f===6)return 2;
+      if(f===7)return 3;
+      if(f===8)return 4;
+      if(f===0)return null;
+      if(f===1)return 1;
+      if(f===2)return 2;
+      if(f===3)return 3;
+    }
+  }
+  return null;
+}
+
+function durName(d){return d===.5?'Halbe':d===.25?'Viertel':d===.125?'Achtel':''}
+function staffPos(m){return 118-(m-60)*3.5}
+function noteHead(x,y,open=false){return `<ellipse cx="${x}" cy="${y}" rx="6.5" ry="4.5" transform="rotate(-20 ${x} ${y})" fill="${open?'white':'#171717'}" stroke="#171717" stroke-width="1.7"/>`}
+function renderScore(){
+ const ex=EX[current], beatWidth=70, left=90;let beatsPos=0;const xs=[];
+ ex.events.forEach(ev=>{xs.push(left+beatsPos*beatWidth);beatsPos+=ev[0]*4});
+ const width=Math.max(1200,left+beatsPos*beatWidth+120);
+ score.setAttribute('viewBox',`0 0 ${width} 560`);score.style.minWidth=width+'px';
+ let s=`<rect width="${width}" height="560" fill="#fff"/>`;
+ staffY.forEach(y=>s+=`<line x1="50" y1="${y}" x2="${width-30}" y2="${y}" stroke="#242424" stroke-width="1"/>`);
+ stringY.forEach(y=>s+=`<line x1="50" y1="${y}" x2="${width-30}" y2="${y}" stroke="#6f6b65" stroke-width="1"/>`);
+ s+=`<text x="54" y="96" font-size="42">𝄞</text><text x="68" y="72" font-size="13" font-weight="700">4</text><text x="68" y="88" font-size="13" font-weight="700">4</text>`;
+ ['e','B','G','D','A','E'].forEach((q,i)=>s+=`<text x="28" y="${stringY[i]+4}" font-family="monospace" font-size="12" font-weight="700">${q}</text>`);
+ // barlines every 4 beats
+ for(let b=0;b<=beatsPos+0.001;b+=4){const x=left+b*beatWidth;s+=`<line x1="${x}" y1="54" x2="${x}" y2="126" stroke="#171717" stroke-width="${b===0?2:1.5}"/><line x1="${x}" y1="260" x2="${x}" y2="470" stroke="#171717" stroke-width="${b===0?2:1.5}"/>`;}
+ // events
+ let eighthPairs=[];
+ ex.events.forEach((ev,i)=>{
+   const [d,tab,midi]=ev,x=xs[i],isRest=tab[0]==='R';
+   if(isRest){s+=`<text x="${x-5}" y="94" font-size="24">𝄽</text>`;}
+   else{
+     const y=staffPos(midi);
+     const open=d===.5;s+=noteHead(x,y,open);
+     if(d!==.5) s+=`<line x1="${x+6}" y1="${y}" x2="${x+6}" y2="${y-34}" stroke="#171717" stroke-width="1.7"/>`;
+     if(y>118){for(let ly=125;ly<=y+2;ly+=7)s+=`<line x1="${x-10}" y1="${ly}" x2="${x+10}" y2="${ly}" stroke="#171717"/>`;}
+     if(d===.125)eighthPairs.push([i,x,y]);
+   }
+   tab.forEach((v,si)=>{if(v!==null&&v!=='R'){const finger=fingerForEvent(ex,ev,i);s+=`<rect x="${x-9}" y="${stringY[si]-10}" width="18" height="18" rx="4" fill="#fff"/><text class="tabFret" x="${x}" y="${stringY[si]+4}" text-anchor="middle" font-family="monospace">${v}</text>${fingeringSel.value==='on'&&finger?`<text class="fingerTag" x="${x}" y="${stringY[si]-24}" text-anchor="middle">${finger}</text>`:''}`;}});
+   // rhythm stem under TAB
+   if(!isRest&&d!==.5){s+=`<line x1="${x}" y1="526" x2="${x}" y2="${d===.125?492:501}" stroke="#171717" stroke-width="1.5"/>`;}
+   if(d===.5){s+=`<circle cx="${x}" cy="520" r="4.3" fill="#fff" stroke="#171717" stroke-width="1.5"/>`;}
+ });
+ // beam adjacent eighths in standard notation and TAB rhythm
+ for(let k=0;k<eighthPairs.length-1;k++){const [i1,x1,y1]=eighthPairs[k],[i2,x2,y2]=eighthPairs[k+1];if(i2===i1+1){const yy=Math.min(y1,y2)-34;s+=`<line x1="${x1+6}" y1="${yy}" x2="${x2+6}" y2="${yy}" stroke="#171717" stroke-width="4"/><line x1="${x1}" y1="492" x2="${x2}" y2="492" stroke="#171717" stroke-width="4"/>`;k++;}}
+ s+=`<text x="52" y="515" font-size="10" fill="#6f6b65" font-weight="700">RHYTHMUS</text>`;
+ score.innerHTML=s;
+}
+function render(){
+ const available=EX.map((e,i)=>({e,i})).filter(x=>(x.e.type||'exercise')===currentLibrary);
+ if(!available.some(x=>x.i===current))current=available[0]?.i??0;
+ list.innerHTML=available.map(({e,i})=>`<button data-i="${i}" class="${i===current?'active':''}"><b>${e.title}</b><br><span style="font-size:9px;opacity:.75">${e.level}</span></button>`).join('');
+ document.querySelectorAll('[data-library]').forEach(b=>b.classList.toggle('active',b.dataset.library===currentLibrary));
+ document.getElementById('title').textContent=EX[current].title;document.getElementById('goal').textContent=EX[current].goal;document.getElementById('musicText').textContent=musicText(EX[current])+(EX[current].source?` Quelle/Arrangement: ${EX[current].source}.`:'');
+ bpmSel.innerHTML=[40,50,55,60,65,70,75,80,90,100,110,120,140].map(v=>`<option ${v===EX[current].bpm?'selected':''}>${v}</option>`).join('');
+ list.querySelectorAll('button').forEach(b=>b.onclick=()=>{stopAll();current=+b.dataset.i;render()});
+ document.querySelectorAll('[data-library]').forEach(b=>b.onclick=()=>{stopAll();currentLibrary=b.dataset.library;render()});
+ renderScore();
+}
+function start(){
+ stopAll();
+ const ex=EX[current],c=audio();c.resume?.();
+ const bpm=+bpmSel.value,beat=60/bpm,countBars=+countSel.value,countDur=countBars*4*beat;
+ const durations=ex.events.map(ev=>ev[0]*4*beat),eventStart=[0];
+ durations.forEach(d=>eventStart.push(eventStart[eventStart.length-1]+d));
+ const total=eventStart[eventStart.length-1];
+ const token={alive:true};run=token;
+ const countStart=c.currentTime+.12,playAt=countStart+countDur;
+
+ // schedule all audio from the same absolute timeline
+ for(let t=countStart,i=0;t<playAt+total-.0001;t+=beat,i++)click(t,i%4===0);
+ let abs=playAt;
+ ex.events.forEach((ev,i)=>{
+   if(guideSel.value==='on'&&ev[2]!=null)playTone(ev[2],abs,durations[i]);
+   abs+=durations[i];
+ });
+
+ document.getElementById('play').textContent='■ LÄUFT';
+ const beatWidth=70,left=90;
+
+ function frame(){
+   if(!token.alive)return;
+   const now=c.currentTime;
+   if(now<playAt){
+     const remain=Math.ceil((playAt-now)/beat);
+     statusEl.textContent=`Count-in · ${remain}`;
+     raf=requestAnimationFrame(frame);return;
+   }
+   const elapsed=now-playAt;
+   if(elapsed>=total){stopAll();statusEl.textContent='Fertig';return}
+
+   let i=0;
+   while(i<durations.length-1 && elapsed>=eventStart[i+1])i++;
+   const local=(elapsed-eventStart[i])/durations[i];
+   const beatPos=(eventStart[i]/beat)+(durations[i]/beat)*local;
+   const px=left+beatPos*beatWidth;
+   scroller.scrollLeft=Math.max(0,px-90);
+
+   const bi=Math.floor(elapsed/beat)%4;
+   beats.forEach((b,k)=>b.classList.toggle('on',k===bi));
+   statusEl.textContent=`Spielen · ${durName(ex.events[i][0])||'Achtel'}`;
+   const secs=Math.floor(elapsed);
+   clockEl.textContent=`${Math.floor(secs/60)}:${String(secs%60).padStart(2,'0')}`;
+   raf=requestAnimationFrame(frame)
+ }
+ raf=requestAnimationFrame(frame)
+}
+document.getElementById('play').onclick=()=>run?stopAll():start();
+document.getElementById('stop').onclick=stopAll;bpmSel.onchange=()=>{if(run)start()};countSel.onchange=()=>{if(run)start()};guideSel.onchange=()=>{if(run)start()};fingeringSel.onchange=()=>{renderScore()};
+document.addEventListener('visibilitychange',()=>{if(document.hidden)stopAll()});
+render();
+</script>
+</body></html>
